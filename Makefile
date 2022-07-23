@@ -1,6 +1,6 @@
 TARGET := riscv64imac-unknown-none-elf
 MODE := debug
-PROJECT_NAME := sheep-os
+PROJECT_NAME := kernel
 KERNEL_FILE := target/$(TARGET)/$(MODE)/$(PROJECT_NAME)
 BIN_FILE := target/$(TARGET)/$(MODE)/kernel.bin
 
