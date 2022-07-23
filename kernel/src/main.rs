@@ -1,11 +1,16 @@
 #![no_std]
 #![no_main]
 
-pub extern "C" fn _start() -> ! {
-    loop {} 
-}
+use core::arch::global_asm;
 
-#[panic_handler] 
-fn _h(_: &core::panic::PanicInfo) -> ! {
-    loop {} 
+use kernel::{print, println, sbi}; 
+
+global_asm!(
+    core::include_str!("entry.asm")
+); 
+
+#[no_mangle]
+pub fn rust_main() -> ! {
+    // println!("Start the game. "); 
+    sbi::shutdown(); 
 }
