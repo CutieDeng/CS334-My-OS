@@ -1,6 +1,6 @@
 TARGET := riscv64imac-unknown-none-elf
 MODE := debug
-PROJECT_NAME := kernel
+PROJECT_NAME := sheep-os
 KERNEL_FILE := target/$(TARGET)/$(MODE)/$(PROJECT_NAME)
 BIN_FILE := target/$(TARGET)/$(MODE)/kernel.bin
 
@@ -52,4 +52,4 @@ cbuild:
 
 debug: build
 	@qemu-system-riscv64 -machine virt -nographic -bios default -device loader,file=$(BIN_FILE),addr=0x80200000 -s -S & \
-		riscv64-unknown-elf-gdb --symbols=target/riscv64imac-unknown-none-elf/debug/sheep-os.d --eval-command='target remote localhost:1234'
+		riscv64-unknown-elf-gdb --symbols=target/riscv64imac-unknown-none-elf/debug/cutie-os --eval-command='target remote localhost:1234'
