@@ -3,7 +3,7 @@
 
 pub mod sbi; 
 pub mod console; 
-pub mod panic; 
+mod panic; 
 
 pub mod interrupt;
 pub mod memory; 

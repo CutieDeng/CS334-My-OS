@@ -3,12 +3,14 @@ use crate::memory::config::KERNEL_END_ADDRESS;
 mod config; 
 mod heap; 
 mod address; 
-pub mod frame; 
+mod frame; 
 mod range; 
 
 pub use config::*; 
 pub use address::*; 
 pub use range::Range; 
+
+pub use frame::*; 
 
 pub fn init() {
     heap::init(); 

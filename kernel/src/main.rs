@@ -53,11 +53,11 @@ pub extern "C" fn rust_main() -> ! {
     for _ in 0..20_000_000 {} 
 
     for _ in 0..2 {
-        let frame_0 = match memory::frame::FRAME_ALLOCATOR.lock().alloc() {
+        let frame_0 = match memory::FRAME_ALLOCATOR.lock().alloc() {
             Result::Ok(frame_tracker) => frame_tracker,
             Result::Err(err) => panic!("{}", err)
         };
-        let frame_1 = match memory::frame::FRAME_ALLOCATOR.lock().alloc() {
+        let frame_1 = match memory::FRAME_ALLOCATOR.lock().alloc() {
             Result::Ok(frame_tracker) => frame_tracker,
             Result::Err(err) => panic!("{}", err)
         };

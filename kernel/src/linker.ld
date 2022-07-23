@@ -31,6 +31,7 @@ SECTIONS {
     bss_start = .; 
 
     .bss : {
+        *(.bss.stack)
         *(.sbss .bss .bss.*)
     }
 
