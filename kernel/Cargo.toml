@@ -10,7 +10,7 @@ riscv = { git = "https://github.com/rcore-os/riscv", features = ["inline-asm"] }
 buddy_system_allocator = { git = "https://github.com/rcore-os/buddy_system_allocator"} 
 lazy_static = {version = "1.4.0", features = ["spin_no_std"]} 
 spin = "0.5.2" 
-algorithm = { path = "src/algorithm" } 
+algorithm = { path = "../algorithm" } 
 
 [profile.dev] 
 panic = "abort"
