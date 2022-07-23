@@ -52,4 +52,4 @@ cbuild:
 
 debug: build
 	@qemu-system-riscv64 -machine virt -nographic -bios default -device loader,file=$(BIN_FILE),addr=0x80200000 -s -S & \
-		riscv64-unknown-elf-gdb --symbols=target/riscv64imac-unknown-none-elf/debug/cutie-os --eval-command='target remote localhost:1234'
+		riscv64-unknown-elf-gdb --symbols=target/riscv64imac-unknown-none-elf/debug/$(PROJECT_NAME) --eval-command='target remote localhost:1234'
