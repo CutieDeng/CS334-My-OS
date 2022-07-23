@@ -8,18 +8,8 @@ use riscv::register::{time, sie, sstatus};
 /// 开启时钟中断使能，并且预约第一次时钟中断
 pub fn init() {
     unsafe {
-        // core::arch::asm!(
-        //     "csrsi sie, 5", 
-        //     "csrsi sstatus, 1", 
-        // ); 
-
         sie::set_stimer(); 
         sstatus::set_sie(); 
-
-        // core::arch::asm!(
-            // "csrci sie, 5", 
-            // "csrsi sstatus, 1", 
-        // ); 
     }
     set_next_timeout(); 
     println!("[[mod]] interrupt.timer has been initialized. ")

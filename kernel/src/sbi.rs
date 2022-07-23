@@ -4,7 +4,7 @@
 
 /// sbi 调用，设置为内联函数以减少执行动态开销。
 #[inline(always)]
-pub fn sbi_call(which: usize, arg0: usize, arg1:usize, arg2: usize) -> usize {
+fn sbi_call(which: usize, arg0: usize, arg1:usize, arg2: usize) -> usize {
     let ret; 
     unsafe {
         core::arch::asm!("ecall", 

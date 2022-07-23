@@ -86,16 +86,8 @@ pub fn handle_interrupt_backup(context: &mut Context, scause: usize, stval: usiz
 /// 继续执行，其中 `sepc` 增加 2 字节，以跳过当前这条 `ebreak` 指令
 fn breakpoint(context: &mut Context) {
     println!("Breakpoint at 0x{:x}", context.sepc); 
-
     // 该语句无法正确的设置 context 的 sepc 的值变化过程！
     context.sepc += 2;
-
-    // unsafe {
-    //     use core::arch::asm; 
-    //     asm!("csrr t0, sepc", 
-    //         "addi t0, t0, 2", 
-    //         "csrw sepc, t0"); 
-    // }
 }
 
 /// 处理时钟中断
@@ -127,4 +119,5 @@ mod cause {
             }
         }
     }
+
 }

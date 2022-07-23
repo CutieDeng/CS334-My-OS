@@ -19,7 +19,7 @@ static mut HEAP_SPACE: [u8; KERNEL_HEAP_SIZE] = [0; KERNEL_HEAP_SIZE];
 static HEAP: LockedHeap<{KERNEL_HEAP_SIZE}> = LockedHeap::empty(); 
 
 /// 初始化操作系统运行时堆空间
-pub fn init() {
+pub(super) fn init() {
     // 告诉分配器使用这一段预留的空间作为堆
     unsafe {
         HEAP.lock().init(

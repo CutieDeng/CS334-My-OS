@@ -7,14 +7,9 @@ extern crate alloc;
 use alloc::boxed::Box;
 use alloc::vec::Vec; 
 
-mod sbi; 
-mod console; 
-mod panic; 
-
-mod interrupt;
-mod memory; 
-
 core::arch::global_asm!(include_str!("entry.asm")); 
+
+use kernel::*; 
 
 unsafe fn ebreak() {
     use core::arch::asm; 

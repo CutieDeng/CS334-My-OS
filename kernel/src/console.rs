@@ -24,16 +24,6 @@ impl Write for Stdout {
     /// ['console_putchar'] sbi 调用每次接受一个 `usize`, 但实际上其并不是一个 unicode 式的输出接口
     /// 想要正确地输出一个非 ASCII 字符，需要将其转义成一个 utf-8 序列并逐个进行输出。
     fn write_str(&mut self, s: &str) -> fmt::Result {
-        // let mut buffer = [0u8; 8]; 
-
-        // for c in s.char_indices() {
-        // }
-        // for c in s.chars() {
-        //     for &code_point in c.encode_utf8(&mut buffer).as_bytes() {
-        //         console_putchar(code_point.into()); 
-        //     }
-        // }
-
         for &b in s.as_bytes() {
             console_putchar(b.into()); 
         }
