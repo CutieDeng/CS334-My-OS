@@ -12,8 +12,5 @@ lazy_static = {version = "1.4.0", features = ["spin_no_std"]}
 spin = "0.5.2" 
 algorithm = { path = "../algorithm" } 
 
-[profile.dev] 
-panic = "abort"
-
-[profile.release]
-panic = "abort"
+[features] 
+time_enabled = [] 

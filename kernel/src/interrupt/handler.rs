@@ -50,7 +50,7 @@ pub fn handle_interrupt(context: &mut Context, scause: riscv::register::scause::
 /// context 内值的变化将会在函数执行结束后影响程式执行现场的内容 
 #[allow(dead_code, unused_variables)]
 #[no_mangle]
-pub fn handle_interrupt_backup(context: &mut Context, scause: usize, stval: usize) { 
+extern "C" fn handle_interrupt_backup(context: &mut Context, scause: usize, stval: usize) { 
     use self::cause::*; 
     match scause.get_cause() {
         // 断点异常

@@ -10,6 +10,7 @@ mod timer;
 /// - [`time::init`] 
 pub fn init() {
     handler::init(); 
+    #[cfg(feature = "time_enabled")]
     timer::init(); 
     crate::println!("[[mod]] interrupt has been initialized"); 
 }
