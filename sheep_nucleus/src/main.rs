@@ -9,7 +9,11 @@ use alloc::vec::Vec;
 
 core::arch::global_asm!(include_str!("entry.asm")); 
 
-use kernel::*; 
+mod sbi;
+mod interrupt;
+mod memory;
+mod console;
+mod panic;
 
 unsafe fn ebreak() {
     use core::arch::asm; 
@@ -33,12 +37,12 @@ pub extern "C" fn rust_main() -> ! {
     let mut t = Vec::new(); 
     for i in 0..20_000_000 {
         t.push(0); 
-        if i % 500 == 0 {
+        if i % 10000 == 0 {
             let p = (&t[i]) as *const i32 as usize; 
             println!("t[{}]'s address is {:x}", i, p); 
         }
     } 
 
     println!("关机！"); 
-    sbi::shutdown(); 
+    sbi::shutdown();
 }

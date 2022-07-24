@@ -16,7 +16,11 @@ static mut HEAP_SPACE: [u8; KERNEL_HEAP_SIZE] = [0; KERNEL_HEAP_SIZE];
 /// [`LockedHeap`] 实现了 [`alloc::alloc::GlobalAlloc`] trait. 
 /// 可以为全局需要用到堆的地方分配空间。例如 `Box` `Arc` 等
 #[global_allocator]
-static HEAP: LockedHeap<{KERNEL_HEAP_SIZE}> = LockedHeap::empty(); 
+static HEAP: LockedHeap<{KERNEL_HEAP_SIZE}> = LockedHeap::empty();
+#[alloc_error_handler]
+fn alloc_error_handler(_: core::alloc::Layout) -> ! {
+    panic!("蛮羊系统堆内存分配异常。")
+}
 
 /// 初始化操作系统运行时堆空间
 pub(super) fn init() {

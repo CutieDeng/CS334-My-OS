@@ -1,5 +1,5 @@
 [workspace] 
 members = [
-    "kernel",
+    "sheep_nucleus",
     "algorithm", 
 ]
