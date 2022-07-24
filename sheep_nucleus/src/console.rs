@@ -93,6 +93,9 @@ macro_rules! color_print {
 }
 #[macro_export]
 macro_rules! color_println {
+    ($color:expr, $identity:expr) => {
+        $crate::color_print!($color, $identity, "\n")  //如果是空的，没有参数，那么调用上面的eprint打出一行。
+    };
     ($color:expr, $identity:expr, $fmt: literal $(, $($arg: tt)+)?) => {
         $crate::console::print(format_args!(concat!(concat!("\x1b[{}m[{}]", $fmt), "\x1b[0m\n"),
         $color, $identity $(, $($arg)+)? ))
