@@ -1,7 +1,13 @@
+# 0. 是否对make的流程打日志
+MAKE_SAY ?= true
+echo := echo
+ifneq ($(MAKE_SAY), true)
+	echo:= ":"
+endif
 # 1.1 构建目标
 TARGET := riscv64imac-unknown-none-elf
 # 询问构建模式，默认为这里的值。dev, release, test, bench
-MODE ?= release
+MODE ?= dev
 CARGO_BUILD_MODE := --profile=$(MODE)
 ifeq ($(MODE), dev)
 	RUSTC_MODE := release
@@ -30,13 +36,13 @@ KERNEL_ENTRY_PA ?= 0x80200000
 # 1.4 cargo 设置
 configure_cargo: .cargo/config.toml
 .cargo/config.toml: .cargo/config_template.toml
-	@echo "正在配置cargo编译参数。"
+	@$(echo) "正在配置cargo编译参数。"
 	@cp .cargo/config_template.toml .cargo/config.toml
-	@echo "\nrustflags = [\"-C\", \"link-arg=-T$(PROJECT_NAME)/src/linker.ld\", ]">>.cargo/config.toml
-	@echo "配置完成!"
+	@$(echo) "\nrustflags = [\"-C\", \"link-arg=-T$(PROJECT_NAME)/src/linker.ld\", ]">>.cargo/config.toml
+	@$(echo) "配置完成!"
 clean_cargo_config: .cargo/config.toml
 	@rm $^
-	@echo "已清理cargo编译配置。"
+	@$(echo) "已清理cargo编译配置。"
 # 2. 工具
 OBJDUMP := rust-objdump --arch-name=riscv64
 OBJCOPY := rust-objcopy --binary-architecture=riscv64
@@ -53,7 +59,7 @@ kernel:
 	@cargo build $(CARGO_BUILD_MODE)
 
 $(KERNEL_BIN): kernel
-	@echo "内核构建成功。正在从elf格式导出bin格式。"
+	@$(echo) "内核构建成功。正在从elf格式导出bin格式。"
 	@$(OBJCOPY) $(KERNEL_ELF) --strip-all -O binary $(KERNEL_BIN)
 
 asm: 
@@ -61,11 +67,12 @@ asm:
 
 clean: clean_cargo_config
 	@cargo clean
+	@$(echo) "已经清理cargo项目。"
 
 
 qemu: build
-	@echo "正在启动qemu模拟器。"
-	qemu-system-riscv64 \
+	@$(echo) "正在启动qemu模拟器。"
+	@qemu-system-riscv64 \
 		-machine virt \
 		-nographic \
 		-bios $(BOOTLOADER) \
@@ -83,10 +90,12 @@ cbuild:
 	@make build
 
 debugserver: build
+	@$(echo) "启动调试器。"
 	@qemu-system-riscv64 -machine virt -nographic -bios $(BOOTLOADER) -device loader,file=$(KERNEL_BIN),addr=$(KERNEL_ENTRY_PA) -s -S
 ds: debugserver
 
 debug: build
+	@$(echo) "启动调试器。"
 	@qemu-system-riscv64 -machine virt -nographic -bios $(BOOTLOADER) -device loader,file=$(KERNEL_BIN),addr=$(KERNEL_ENTRY_PA) -s -S & \
 	riscv64-unknown-elf-gdb --symbols=$(KERNEL_ELF) --eval-command='target remote localhost:1234'
 
