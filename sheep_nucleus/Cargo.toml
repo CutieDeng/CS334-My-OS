@@ -10,8 +10,15 @@ riscv = { git = "https://github.com/rcore-os/riscv", features = ["inline-asm"] }
 buddy_system_allocator = { git = "https://github.com/rcore-os/buddy_system_allocator"} 
 lazy_static = {version = "1.4.0", features = ["spin_no_std"]} 
 spin = "0.5.2" 
-algorithm = { path = "../algorithm" } 
+algorithm = { path = "../algorithm" }
+log = "0.4.8"
 
 [features] 
 time_enabled = []
 
+#debug = []
+#info = []
+#warn = []
+#error = []
+#
+#log_level = ["info", "warn", "error"]   # 这里标识程序要显示的所有log类别

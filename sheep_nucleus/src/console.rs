@@ -58,3 +58,12 @@ macro_rules! println {
         $crate::console::print(format_args!(concat!($fmt, "\n") $(, $($arg)+)?)) 
     } 
 }
+
+// 实现类 std 的宏 eprintln!
+#[macro_export]
+macro_rules! eprintln {
+    ($fmt: literal $(, $($arg: tt)+)?) => {
+        $crate::console::print(format_args!(concat!(concat!("{}", concat!($fmt, "\n")), "{}"),
+        "\x1b[1;31m", $(, $($arg)+)? "\x1b[0m"))
+    }
+}

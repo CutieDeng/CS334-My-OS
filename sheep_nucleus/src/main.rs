@@ -14,17 +14,18 @@ mod interrupt;
 mod memory;
 mod console;
 mod panic;
+// mod log;
 
 unsafe fn ebreak() {
     use core::arch::asm; 
     asm!("ebreak"); 
 }
-
 #[no_mangle]
 pub extern "C" fn rust_main() -> ! {
     interrupt::init(); 
-    memory::init(); 
-
+    memory::init();
+    // log::warn!("This is an example message.");
+    eprintln!("打印红色信息测试!");
     {
         println!("栈地址初始位置为：0x{:x}. ", 
             &0 as *const i32 as usize); 
@@ -34,15 +35,14 @@ pub extern "C" fn rust_main() -> ! {
 
     println!("内核结束地址：0x{:x}", memory::get_kernel_end()); 
 
-    let mut t = Vec::new(); 
-    for i in 0..20_000_000 {
-        t.push(0); 
-        if i % 10000 == 0 {
-            let p = (&t[i]) as *const i32 as usize; 
-            println!("t[{}]'s address is {:x}", i, p); 
-        }
-    } 
-
+    // let mut t = Vec::new();
+    // for i in 0..20_000_000 {
+    //     t.push(0);
+    //     if i % 10000 == 0 {
+    //         let p = (&t[i]) as *const i32 as usize;
+    //         println!("t[{}]'s address is {:x}", i, p);
+    //     }
+    // }
     println!("关机！"); 
     sbi::shutdown();
 }
