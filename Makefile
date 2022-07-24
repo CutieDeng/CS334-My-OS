@@ -9,7 +9,7 @@ TARGET := riscv64imac-unknown-none-elf
 # 询问构建模式，默认为这里的值。dev, release, test, bench
 MODE ?= dev
 CARGO_BUILD_MODE := --profile=$(MODE)
-ifeq ($(MODE), dev)
+ifeq ($(MODE), bench)
 	RUSTC_MODE := release
 else
 	ifeq ($(MODE), release)
