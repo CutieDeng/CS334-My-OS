@@ -1,17 +1,24 @@
 # 1.1 构建目标
 TARGET := riscv64imac-unknown-none-elf
-# 询问构建模式，默认为这里的值。
-# cargo的构建模式分为 dev, release, test, bench
-# 参考 https://doc.rust-lang.org/cargo/reference/profiles.html
-CARGO_BUILD_MODE ?= dev
+# 询问构建模式，默认为这里的值。dev, release, test, bench
+MODE ?= release
+CARGO_BUILD_MODE := --profile=$(MODE)
+ifeq ($(MODE), dev)
+	RUSTC_MODE := release
+else
+	ifeq ($(MODE), release)
+		RUSTC_MODE := release
+	endif
+	RUSTC_MODE := debug
+endif
 #PROJECT_NAME := kernel
 PROJECT_NAME := sheep_nucleus
 
 # 1.2 推导出编译的二进制位置，分ELF格式(用于debug)和BIN格式(用于加载到qemu)
 #cargo编译生成
-KERNEL_ELF := target/$(TARGET)/$(MODE)/$(PROJECT_NAME)
+KERNEL_ELF := target/$(TARGET)/$(RUSTC_MODE)/$(PROJECT_NAME)
 #make调用objcopy生成
-KERNEL_BIN := target/$(TARGET)/$(MODE)/$(PROJECT_NAME).bin
+KERNEL_BIN := target/$(TARGET)/$(RUSTC_MODE)/$(PROJECT_NAME).bin
 
 # 1.3 操作系统的基础执行环境：监督层二进制接口(Supervisor Binary Interface)的定义
 # 选用的SBI的名称，应当放置同名bin扩展名文件在bootloader文件夹下。可选参数，默认为qemu下模拟运行 rustsbi 。
@@ -52,9 +59,9 @@ $(KERNEL_BIN): kernel
 asm: 
 	@$(OBJDUMP) -d $(KERNEL_ELF) | less 
 
-clean: 
+clean: clean_cargo_config
 	@cargo clean
-	clean_cargo_config
+
 
 qemu: build
 	@echo "正在启动qemu模拟器。"
