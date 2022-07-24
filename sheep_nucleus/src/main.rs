@@ -34,7 +34,7 @@ pub extern "C" fn rust_main() -> ! {
     log::info!("This is an info message.");
     log::debug!("This is an warning message.");
     log::trace!("This is an trace message.");
-    color_println!(33, "内核级错误");
+    color_println!(33);
 
     eprintln!("打印红色信息测试!");
     for c in 'A'..='Z'{

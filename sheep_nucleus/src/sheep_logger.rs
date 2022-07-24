@@ -30,7 +30,7 @@ impl Log for SheepLogger {
                 Level::Debug => LogColor::Green,
                 Level::Trace => LogColor::Gray,
             };
-            color_println!(color as u32, record.level(), "{}: {}", record.target(), record.args());
+            color_println!(color as u32, "[{}]{}: {}", record.level(), record.target(), record.args());
             //还有别的信息可以打
             //见 https://docs.rs/log/0.4.17/log/struct.Record.html
         }
