@@ -1,7 +1,8 @@
 [workspace] 
 members = [
     "sheep_nucleus",
-    "algorithm", 
+    "algorithm",
+#    "colored",
 ]
 
 # cargo 的构建模式分为 dev, release, test, bench

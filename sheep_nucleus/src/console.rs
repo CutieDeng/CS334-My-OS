@@ -82,3 +82,19 @@ macro_rules! eprintln {
     }
 }
 
+
+// 实现 简单彩色打印
+#[macro_export]
+macro_rules! color_print {
+    ($color:expr, $identity:expr, $fmt: literal $(, $($arg: tt)+)?) => {
+        $crate::console::print(format_args!(concat!(concat!("\x1b[{}m[{}]", $fmt), "\x1b[0m"),
+        $color, $identity $(, $($arg)+)? ))
+    }
+}
+#[macro_export]
+macro_rules! color_println {
+    ($color:expr, $identity:expr, $fmt: literal $(, $($arg: tt)+)?) => {
+        $crate::console::print(format_args!(concat!(concat!("\x1b[{}m[{}]", $fmt), "\x1b[0m\n"),
+        $color, $identity $(, $($arg)+)? ))
+    }
+}
