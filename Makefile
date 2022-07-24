@@ -1,6 +1,7 @@
 # 1.1 构建目标
 TARGET := riscv64imac-unknown-none-elf
-MODE ?= debug # 询问构建模式，默认debug. 
+# 询问构建模式，默认 debug 。
+MODE ?= debug
 PROJECT_NAME := kernel
 ifeq ($(MODE), release)
 	CARGO_BUILD_MODE := --release
@@ -8,17 +9,23 @@ else
 	CARGO_BUILD_MODE :=
 endif
 # 1.2 推导出编译的二进制位置，分ELF格式(用于debug)和BIN格式(用于加载到qemu)
-KERNEL_ELF := target/$(TARGET)/$(MODE)/$(PROJECT_NAME)     #cargo编译生成
-KERNEL_BIN := target/$(TARGET)/$(MODE)/$(PROJECT_NAME).bin #make调用objcopy生成
+#cargo编译生成
+KERNEL_ELF := target/$(TARGET)/$(MODE)/$(PROJECT_NAME)
+#make调用objcopy生成
+KERNEL_BIN := target/$(TARGET)/$(MODE)/$(PROJECT_NAME).bin
 
 # 1.3 操作系统的基础执行环境：监督层二进制接口(Supervisor Binary Interface)的定义
-SBI ?=qemu-rustsbi # 选用的SBI的名称，应当放置同名bin扩展名文件在bootloader文件夹下。可选参数，默认为qemu下模拟运行 rustsbi 。
-BOOTLOADER := ./bootloader/$(SBI).bin # 推导出位置
-KERNEL_ENTRY_PA ?= $(KERNEL_ENTRY_PA)         # 内核代码开始的物理地址，随qemu或者硬件设置可能不同。默认为该地址。
+# 选用的SBI的名称，应当放置同名bin扩展名文件在bootloader文件夹下。可选参数，默认为qemu下模拟运行 rustsbi 。
+SBI ?=rustsbi-qemu
+# 推导出位置
+BOOTLOADER := ./bootloader/$(SBI).bin
+# 内核代码开始的物理地址，随qemu或者硬件设置可能不同。默认为该地址。
+KERNEL_ENTRY_PA ?= 0x80200000
 
 # 2. 工具
 OBJDUMP := rust-objdump --arch-name=riscv64
-OBJCOPY := rust-objcopy --binary-architecture=riscv64
+#OBJCOPY := rust-objcopy --binary-architecture=riscv64
+OBJCOPY := rust-objcopy
 
 # 3.
 .PHONY: doc kernel build clean qemu run asm r c cbuild debug
@@ -31,8 +38,9 @@ doc:
 kernel: 
 	@cargo build $(CARGO_BUILD_MODE)
 
-$(KERNEL_BIN): kernel 
-	@$(OBJCOPY) $(KERNEL_ELF) --strip-all -O binary $@
+$(KERNEL_BIN): kernel
+	@echo "内核构建成功。正在从elf格式导出bin格式。"
+	@$(OBJCOPY) $(KERNEL_ELF) --strip-all -O binary $(KERNEL_BIN)
 
 asm: 
 	@$(OBJDUMP) -d $(KERNEL_ELF) | less 
@@ -40,8 +48,9 @@ asm:
 clean: 
 	@cargo clean 
 
-qemu: build 
-	@qemu-system-riscv64 \
+qemu: build
+	@echo "正在启动qemu模拟器。"
+	qemu-system-riscv64 \
 		-machine virt \
 		-nographic \
 		-bios $(BOOTLOADER) \
