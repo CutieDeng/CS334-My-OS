@@ -5,24 +5,22 @@
 extern crate alloc; 
 extern crate log;
 
-use alloc::boxed::Box;
 use alloc::vec::Vec;
 use log::LevelFilter;
-use crate::sheep_logger::SheepLogger;
 
 core::arch::global_asm!(include_str!("entry.asm")); 
 
-mod sbi;
-mod interrupt;
-mod memory;
-mod console;
-mod panic;
+use sheep_nucleus::*; 
+
 mod sheep_logger;
 
+#[inline(always)] 
+#[allow(dead_code)]
 unsafe fn ebreak() {
     use core::arch::asm; 
     asm!("ebreak"); 
 }
+
 #[no_mangle]
 pub extern "C" fn rust_main() -> ! {
     interrupt::init(); 

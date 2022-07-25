@@ -75,8 +75,10 @@ qemu: build
 	@qemu-system-riscv64 \
 		-machine virt \
 		-nographic \
-		-bios $(BOOTLOADER) \
+		-bios default \
 		-device loader,file=$(KERNEL_BIN),addr=$(KERNEL_ENTRY_PA)
+		# -bios default \
+		# -bios $(BOOTLOADER) \
 
 run: build qemu 
 
@@ -99,5 +101,5 @@ debug: build
 	@qemu-system-riscv64 -machine virt -nographic -bios $(BOOTLOADER) -device loader,file=$(KERNEL_BIN),addr=$(KERNEL_ENTRY_PA) -s -S & \
 	riscv64-unknown-elf-gdb --symbols=$(KERNEL_ELF) --eval-command='target remote localhost:1234'
 
-
-
+check: 
+	@cargo check

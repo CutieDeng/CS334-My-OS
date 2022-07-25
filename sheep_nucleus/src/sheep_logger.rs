@@ -1,6 +1,6 @@
-use alloc::boxed::Box;
 use crate::color_println;
 use log::{LevelFilter, Record, Level, Metadata, SetLoggerError, Log};
+
 /// Implements [`Log`].
 pub struct SheepLogger {
 }
@@ -15,7 +15,7 @@ enum LogColor{
 
 impl Log for SheepLogger {
     /// 为log_enabled!宏决定是否要对执行log，防止实际上不需要log的计算发生。
-    fn enabled(&self, metadata: &Metadata) -> bool {
+    fn enabled(&self, _metadata: &Metadata) -> bool {
         true //我们已经设置了全局 level 。暂时不需要更加细化的 level 。
     }
     fn log(&self, record: &Record) {

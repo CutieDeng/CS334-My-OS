@@ -2,6 +2,8 @@
 
 mod handler; 
 mod context; 
+
+#[cfg(feature = "time_enabled")]
 mod timer; 
 
 /// 初始化中断相关的子模块
