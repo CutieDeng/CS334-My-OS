@@ -27,35 +27,43 @@ pub extern "C" fn rust_main() -> ! {
     memory::init();
     sheep_logger::init().expect("日志管理器加载失败！");
     sheep_logger::set_level(LevelFilter::Trace);
-    log::error!("This is an error message.");
-    log::warn!("This is an warning message.");
-    log::info!("This is an info message.");
-    log::debug!("This is an warning message.");
-    log::trace!("This is an trace message.");
-
-    eprintln!("打印红色信息测试!");
-    for c in 'A'..='Z'{
-        eprint!("{}", c);
-    }
-    // println!("蓝色信息测试".blue());
-    eprintln!();
-    {
-        println!("栈地址初始位置为：0x{:x}. ", 
-            &0 as *const i32 as usize); 
-    }
-
-    println!("你好，我的 rCore. "); 
-
-    println!("内核结束地址：0x{:x}", memory::get_kernel_end()); 
-
-    let mut t = Vec::new();
-    for i in 0..20_000_000 {
-        t.push(0);
-        if i % 100000 == 0 {
-            let p = (&t[i]) as *const i32 as usize;
-            println!("t[{}]'s address is {:x}", i, p);
+    if cfg!(feature = "twocat-log-debug-itself") {
+        log::error!("This is an error message.");
+        log::warn!("This is an warning message.");
+        log::info!("This is an info message.");
+        log::debug!("This is an warning message.");
+        log::trace!("This is an trace message.");
+        // .. 
+        eprintln!("打印红色信息测试!");
+        for c in 'A'..='Z'{
+            eprint!("{}", c);
         }
+        eprintln!();
     }
+    {
+        // Cheeting codes! No the actually the address of the stack! 
+        // println!("栈地址初始位置为：0x{:x}. ", 
+        //     &0 as *const i32 as usize); 
+    }
+    {
+        extern "C" {
+            fn boot_page_table(); 
+            fn data_start(); 
+            fn kernel_end(); 
+            fn boot_stack(); 
+            fn boot_stack_top(); 
+        }
+        println!("boot page table addr: 0x{:x}", { boot_page_table as usize } ); 
+        println!("data start: 0x{:x}", { data_start as usize } ); 
+        println!("kernel end: 0x{:x}", { kernel_end as usize } ); 
+        println!("boot stack: 0x{:x}", { boot_stack as usize } ); 
+        println!("boot stack top: 0x{:x}", { boot_stack_top as usize } ); 
+        // Fetch the value of sp: 
+        let sp: usize; 
+        unsafe { core::arch::asm!("mv {0}, sp", out(reg) sp, ); } 
+        println!("The value of the stack pointer is: 0x{:x}", sp); 
+    }
+    println!("你好，我的 rCore. "); 
     println!("关机！"); 
     shutdown();
 }

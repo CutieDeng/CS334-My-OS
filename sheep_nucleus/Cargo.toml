@@ -17,9 +17,9 @@ log = "0.4.8"
 [features] 
 default = ["time-enabled"]
 time-enabled = []
+twocat-log-debug-itself = [] 
 #debug = []
 #info = []
 #warn = []
 #error = []
-#
 #log_level = ["info", "warn", "error"]   # 这里标识程序要显示的所有log类别
