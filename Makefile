@@ -1,3 +1,6 @@
+c: 
+	@cargo c
+
 # 0. 是否对make的流程打日志
 MAKE_SAY ?= true
 echo := echo
@@ -48,7 +51,7 @@ OBJDUMP := rust-objdump --arch-name=riscv64
 OBJCOPY := rust-objcopy --binary-architecture=riscv64
 
 # 3.
-.PHONY: doc kernel build clean qemu run asm r c cbuild debug
+.PHONY: doc kernel build clean qemu run asm r c cbuild debug check
 
 build: .cargo/config.toml $(KERNEL_BIN)
 
@@ -75,17 +78,12 @@ qemu: build
 	@qemu-system-riscv64 \
 		-machine virt \
 		-nographic \
-		-bios default \
+		-bios $(BOOTLOADER) \
 		-device loader,file=$(KERNEL_BIN),addr=$(KERNEL_ENTRY_PA)
-		# -bios default \
-		# -bios $(BOOTLOADER) \
 
 run: build qemu 
 
 r: run 
-
-c: 
-	@cargo c
 
 cbuild: 
 	@make clean 

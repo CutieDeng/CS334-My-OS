@@ -57,5 +57,5 @@ pub extern "C" fn rust_main() -> ! {
         }
     }
     println!("关机！"); 
-    sbi::shutdown();
+    shutdown();
 }

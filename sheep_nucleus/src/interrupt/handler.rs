@@ -47,7 +47,7 @@ extern "C" fn handle_interrupt_backup(context: &mut Context, scause: usize, stva
 
         // 时钟中断
         Cause::Interrupt(5) => {
-            #[cfg(feature = "time_enabled")]
+            #[cfg(feature = "time-enabled")]
             supervisor_timer(context); 
         }
 
@@ -71,7 +71,7 @@ fn breakpoint(context: &mut Context) {
 /// 处理时钟中断
 /// 
 /// 目前只会在 [`timer`] 模块中进行计数
-#[cfg(feature = "time_enabled")]
+#[cfg(feature = "time-enabled")]
 fn supervisor_timer(_: &Context) {
     use super::*; 
     timer::tick();  

@@ -15,7 +15,8 @@ log = "0.4.8"
 #colored = "2.0.0"
 
 [features] 
-time_enabled = []
+default = ["time-enabled"]
+time-enabled = []
 #debug = []
 #info = []
 #warn = []
