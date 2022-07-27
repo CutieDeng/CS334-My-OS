@@ -13,8 +13,6 @@ pub use memory::FrameTracker;
 pub mod interrupt;
 pub mod memory; 
 
-pub use debug::*; 
-
 #[deprecated]
 pub mod debug {
 

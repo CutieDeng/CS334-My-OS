@@ -5,12 +5,11 @@
 extern crate alloc; 
 extern crate log;
 
-use alloc::vec::Vec;
 use log::LevelFilter;
 
 core::arch::global_asm!(include_str!("entry.asm")); 
 
-use sheep_nucleus::{*, memory::PAGE_SIZE}; 
+use sheep_nucleus::*; 
 
 mod sheep_logger;
 
@@ -24,14 +23,20 @@ unsafe fn ebreak() {
 #[no_mangle]
 pub extern "C" fn rust_main() -> ! {
     interrupt::init(); 
-    if false 
     {
-        let a: usize; 
+        let mut a: usize; 
         unsafe {
             core::arch::asm!("csrr {}, satp", out(reg) a); 
         }
-        print!("Satp value: 0x"); 
-        output_val_0x(a); 
+        println!("satp: 0x{:x}", a); 
+        unsafe {
+            core::arch::asm!("mv {}, sp", out(reg) a); 
+        }
+        println!("sp: 0x{:x}", a); 
+        extern "C" {
+            fn kernel_end(); 
+        }
+        println!("END of kernel: 0x{:x}", kernel_end as usize); 
     }
     memory::init();
     sheep_logger::init().expect("日志管理器加载失败！");
@@ -48,32 +53,6 @@ pub extern "C" fn rust_main() -> ! {
             eprint!("{}", c);
         }
         eprintln!();
-    }
-    if false 
-    {
-        extern "C" {
-            fn boot_page_table(); 
-            fn data_start(); 
-            // fn kernel_end(); 
-            // fn boot_stack(); 
-            // fn boot_stack_top(); 
-        }
-        output_val_with_hint("boot page table addr: 0x", {boot_page_table as usize}); 
-        output_val_with_hint("data start: 0x", {data_start as usize}); 
-        let boot_page_table_addr: usize; 
-        unsafe { core::arch::asm!("lui {}, %hi(boot_page_table)", out(reg) boot_page_table_addr);  }
-        output_val_with_hint("Boot page table addr: 0x", boot_page_table_addr);  
-        // println!("boot page table addr: 0x{:x}", { boot_page_table as usize } ); 
-        // println!("data start: 0x{:x}", { data_start as usize } ); 
-        // println!("kernel end: 0x{:x}", { kernel_end as usize } ); 
-        // println!("boot stack: 0x{:x}", { boot_stack as usize } ); 
-        // println!("boot stack top: 0x{:x}", { boot_stack_top as usize } ); 
-        // Fetch the value of sp: 
-        let sp: usize; 
-        unsafe { core::arch::asm!("mv {0}, sp", out(reg) sp, ); } 
-        // println!("The value of the stack pointer is: 0x{:x}", sp); 
-        output_val_with_hint("The value of the stack pointer is: 0x", sp); 
-        output_pte(boot_page_table as usize); 
     }
     println!("你好，我的 rCore. "); 
     {

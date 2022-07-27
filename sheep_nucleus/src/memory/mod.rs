@@ -3,6 +3,7 @@ mod heap;
 mod address; 
 mod frame; 
 mod range; 
+mod mapping; 
 
 pub use config::*; 
 pub use address::*; 
