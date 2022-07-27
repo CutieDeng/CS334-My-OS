@@ -33,7 +33,6 @@ extern "C" fn handle_interrupt_backup(context: &mut Context, scause: usize, stva
         // 断点异常
         Cause::Exception(3) => {
             // println!("获取断点～"); 
-            crate::debug::output_val_with_hint("[Handle] Breakpoint context addr: ", context as *mut Context as usize); 
             breakpoint(context); 
         }
 
@@ -54,8 +53,8 @@ extern "C" fn handle_interrupt_backup(context: &mut Context, scause: usize, stva
 
         // 其他情况
         _ => {
-            // panic!("Unresolved interrupt: {:?}\n{:x?}\nstval: {:x}", scause.cause(), context, stval); 
-            unimplemented!("Still need to finish. "); 
+            panic!("Unresolved interrupt: {:?}\n{:x?}\nstval: {:x}", scause.get_cause(), context, stval); 
+            // unimplemented!("Still need to finish. "); 
         }
     }
 }
@@ -64,11 +63,7 @@ extern "C" fn handle_interrupt_backup(context: &mut Context, scause: usize, stva
 /// 
 /// 继续执行，其中 `sepc` 增加 2 字节，以跳过当前这条 `ebreak` 指令
 fn breakpoint(context: &mut Context) {
-    crate::debug::output_val_with_hint("[Handle In] breakpoint context addr: ", context as *mut Context as usize); 
     println!("Breakpoint at 0x{:x}", context.sepc); 
-    crate::debug::output_val_with_hint("[After println] Epc: ", context.sepc); 
-    crate::debug::output_val_with_hint("[After println] Epc: ", context.sepc); 
-    crate::debug::output_val_with_hint("[After println] Epc: ", context.sepc); 
     // 该语句无法正确的设置 context 的 sepc 的值变化过程！
     context.sepc += 2;
 }
@@ -84,6 +79,7 @@ fn supervisor_timer(_: &Context) {
 
 mod cause {
 
+    #[derive(Debug)]
     pub enum Cause {
         Interrupt(usize), 
         Exception(usize), 

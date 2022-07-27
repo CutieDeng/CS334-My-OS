@@ -15,6 +15,7 @@ pub mod memory;
 
 pub use debug::*; 
 
+#[deprecated]
 pub mod debug {
 
     #[deprecated]

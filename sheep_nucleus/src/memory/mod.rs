@@ -1,5 +1,3 @@
-use crate::memory::config::KERNEL_END_ADDRESS;
-
 mod config; 
 mod heap; 
 mod address; 

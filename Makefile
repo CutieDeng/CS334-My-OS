@@ -77,9 +77,11 @@ qemu: build
 	@$(echo) "正在启动qemu模拟器。"
 	@qemu-system-riscv64 \
 		-machine virt \
+		-bios default \
 		-nographic \
-		-bios $(BOOTLOADER) \
 		-device loader,file=$(KERNEL_BIN),addr=$(KERNEL_ENTRY_PA)
+
+# -bios $(BOOTLOADER) \
 
 run: build qemu 
 

@@ -24,8 +24,7 @@ unsafe fn ebreak() {
 #[no_mangle]
 pub extern "C" fn rust_main() -> ! {
     interrupt::init(); 
-    // println!("{}\n\n", 21); 
-    unsafe { ebreak() }; 
+    if false 
     {
         let a: usize; 
         unsafe {
@@ -50,13 +49,14 @@ pub extern "C" fn rust_main() -> ! {
         }
         eprintln!();
     }
+    if false 
     {
         extern "C" {
             fn boot_page_table(); 
             fn data_start(); 
-            fn kernel_end(); 
-            fn boot_stack(); 
-            fn boot_stack_top(); 
+            // fn kernel_end(); 
+            // fn boot_stack(); 
+            // fn boot_stack_top(); 
         }
         output_val_with_hint("boot page table addr: 0x", {boot_page_table as usize}); 
         output_val_with_hint("data start: 0x", {data_start as usize}); 
@@ -73,17 +73,18 @@ pub extern "C" fn rust_main() -> ! {
         unsafe { core::arch::asm!("mv {0}, sp", out(reg) sp, ); } 
         // println!("The value of the stack pointer is: 0x{:x}", sp); 
         output_val_with_hint("The value of the stack pointer is: 0x", sp); 
-        // output_pte(boot_page_table as usize); 
+        output_pte(boot_page_table as usize); 
     }
     println!("你好，我的 rCore. "); 
     {
-        println!("{}, {}", "hello", "world"); 
-        println!("{}, {}", "hello", "world"); 
-        println!("{}, {}", "hello", "world"); 
-        let t = 18; 
-        // println!("My age is {}", t); 
-        #[allow(unconditional_panic)]
-        let t = 3 / 0; 
+        for i in 0..100000000 {
+            use alloc::boxed::Box; 
+            let t = Box::new(3); 
+            if i % 100000 == 0 {
+                println!("The address is {:p}", t.as_ref()); 
+            }
+            core::mem::forget(t); 
+        }
     }
     println!("关机！"); 
     shutdown();
