@@ -6,14 +6,27 @@ pub struct PhysicalAddress(pub usize);
 #[derive(Copy, Clone, Debug, Default, Eq, PartialEq, PartialOrd, Ord, Hash)] 
 pub struct PhysicalPageNumber(pub usize); 
 
-use super::config::{PAGE_SIZE, }; 
+#[repr(C)]
+#[derive(Copy, Clone, Debug, Default, Eq, PartialEq, PartialOrd, Ord, Hash)] 
+pub struct VirtualAddress(pub usize); 
 
-impl PhysicalAddress {
-    /// 取得页内偏移
-    pub fn page_offset(&self) -> usize {
-        self.0 % PAGE_SIZE 
+#[repr(C)]
+#[derive(Copy, Clone, Debug, Default, Eq, PartialEq, PartialOrd, Ord, Hash)] 
+pub struct VirtualPageNumber(pub usize); 
+
+impl VirtualPageNumber {
+    pub fn levels(self) -> [usize; 3] {
+        [
+            self.0.get_bits(18..27), 
+            self.0.get_bits(9..18), 
+            self.0.get_bits(..9), 
+        ]
     }
 }
+
+use bit_field::BitField;
+
+use super::config::PAGE_SIZE;
 
 // quote from RCore. 
 // 实现各类型之前的快速转换，PhysicalAddress -> PhysicalPageNumber & PhysicalPageNumber -> PhysicalAddress 
@@ -48,6 +61,7 @@ macro_rules! implement_address_to_page_number {
     };
 }
 implement_address_to_page_number! {PhysicalAddress, PhysicalPageNumber}
+implement_address_to_page_number! {VirtualAddress, VirtualPageNumber}
 
 // quote from RCore 
 /// 为各种仅包含一个 usize 的类型实现运算操作
@@ -114,3 +128,79 @@ macro_rules! implement_usize_operations {
 }
 implement_usize_operations! {PhysicalAddress}
 implement_usize_operations! {PhysicalPageNumber}
+implement_usize_operations! {VirtualAddress}
+implement_usize_operations! {VirtualPageNumber}
+
+impl PhysicalAddress {
+    /// 从物理地址经过线性映射取得 &mut 引用
+    pub fn deref_kernel<T>(self) -> &'static mut T {
+        VirtualAddress::from(self).deref()
+    }
+    /// 取得页内偏移
+    pub fn page_offset(&self) -> usize {
+        self.0 % PAGE_SIZE
+    }
+}
+impl VirtualPageNumber {
+    /// 从虚拟地址取得页面
+    pub fn deref(self) -> &'static mut [u8; PAGE_SIZE] {
+        VirtualAddress::from(self).deref()
+    }
+}
+impl PhysicalPageNumber {
+    /// 从物理地址经过线性映射取得页面
+    pub fn deref_kernel(self) -> &'static mut [u8; PAGE_SIZE] {
+        PhysicalAddress::from(self).deref_kernel()
+    }
+}
+
+/// 从指针转换为虚拟地址
+impl<T> From<*const T> for VirtualAddress {
+    fn from(pointer: *const T) -> Self {
+        Self(pointer as usize)
+    }
+}
+/// 从指针转换为虚拟地址
+impl<T> From<*mut T> for VirtualAddress {
+    fn from(pointer: *mut T) -> Self {
+        Self(pointer as usize)
+    }
+}
+
+use super::KERNEL_MAP_OFFSET; 
+
+/// 虚实页号之间的线性映射
+impl From<PhysicalPageNumber> for VirtualPageNumber {
+    fn from(ppn: PhysicalPageNumber) -> Self {
+        Self(ppn.0 + KERNEL_MAP_OFFSET / PAGE_SIZE)
+    }
+}
+/// 虚实页号之间的线性映射
+impl From<VirtualPageNumber> for PhysicalPageNumber {
+    fn from(vpn: VirtualPageNumber) -> Self {
+        Self(vpn.0 - KERNEL_MAP_OFFSET / PAGE_SIZE)
+    }
+}
+/// 虚实地址之间的线性映射
+impl From<PhysicalAddress> for VirtualAddress {
+    fn from(pa: PhysicalAddress) -> Self {
+        Self(pa.0 + KERNEL_MAP_OFFSET)
+    }
+}
+/// 虚实地址之间的线性映射
+impl From<VirtualAddress> for PhysicalAddress {
+    fn from(va: VirtualAddress) -> Self {
+        Self(va.0 - KERNEL_MAP_OFFSET)
+    }
+}
+
+impl VirtualAddress {
+    /// 从虚拟地址取得某类型的 &mut 引用
+    pub fn deref<T>(self) -> &'static mut T {
+        unsafe { &mut *(self.0 as *mut T) }
+    }
+    /// 取得页内偏移
+    pub fn page_offset(&self) -> usize {
+        self.0 % PAGE_SIZE
+    }
+}

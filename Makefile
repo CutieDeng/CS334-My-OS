@@ -1,3 +1,6 @@
+c: 
+	@cargo c
+
 # 0. 是否对make的流程打日志
 MAKE_SAY ?= true
 echo := echo
@@ -48,7 +51,7 @@ OBJDUMP := rust-objdump --arch-name=riscv64
 OBJCOPY := rust-objcopy --binary-architecture=riscv64
 
 # 3.
-.PHONY: doc kernel build clean qemu run asm r c cbuild debug
+.PHONY: doc kernel build clean qemu run asm r c cbuild debug check
 
 build: .cargo/config.toml $(KERNEL_BIN)
 
@@ -74,16 +77,15 @@ qemu: build
 	@$(echo) "正在启动qemu模拟器。"
 	@qemu-system-riscv64 \
 		-machine virt \
+		-bios default \
 		-nographic \
-		-bios $(BOOTLOADER) \
 		-device loader,file=$(KERNEL_BIN),addr=$(KERNEL_ENTRY_PA)
+
+# -bios $(BOOTLOADER) \
 
 run: build qemu 
 
 r: run 
-
-c: 
-	@cargo c
 
 cbuild: 
 	@make clean 
@@ -99,5 +101,5 @@ debug: build
 	@qemu-system-riscv64 -machine virt -nographic -bios $(BOOTLOADER) -device loader,file=$(KERNEL_BIN),addr=$(KERNEL_ENTRY_PA) -s -S & \
 	riscv64-unknown-elf-gdb --symbols=$(KERNEL_ELF) --eval-command='target remote localhost:1234'
 
-
-
+check: 
+	@cargo check

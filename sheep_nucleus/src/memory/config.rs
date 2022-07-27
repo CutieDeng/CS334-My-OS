@@ -6,7 +6,7 @@ pub const KERNEL_HEAP_SIZE: usize = 0x80_0000;
 use lazy_static::lazy_static; 
 
 lazy_static! {
-    pub static ref KERNEL_END_ADDRESS: PhysicalAddress = PhysicalAddress(kernel_end as usize);
+    pub static ref KERNEL_END_ADDRESS: VirtualAddress = VirtualAddress(kernel_end as usize);
 }
 
 pub fn get_kernel_end() -> usize {
@@ -16,6 +16,8 @@ pub fn get_kernel_end() -> usize {
 extern "C" {
     fn kernel_end(); 
 }
+
+pub const KERNEL_MAP_OFFSET: usize = 0xFFFF_FFFF_0000_0000; 
 
 /// 页、帧大小，必须是 2^n 
 pub const PAGE_SIZE: usize = 4096; 

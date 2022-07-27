@@ -1,6 +1,7 @@
     .section .text.entry 
     .globl _start 
-_start: 
+
+_start:
     lui t0, %hi(boot_page_table)
     li t1, 0xffffffff00000000
     sub t0, t0, t1
@@ -15,9 +16,6 @@ _start:
     lui t0, %hi(rust_main)
     addi t0, t0, %lo(rust_main)
     jr t0
-
-    la sp, boot_stack_top 
-    call rust_main 
 
     .section .bss.stack 
     .globl boot_stack

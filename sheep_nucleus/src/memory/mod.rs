@@ -1,10 +1,9 @@
-use crate::memory::config::KERNEL_END_ADDRESS;
-
 mod config; 
 mod heap; 
 mod address; 
 mod frame; 
 mod range; 
+mod mapping; 
 
 pub use config::*; 
 pub use address::*; 
@@ -16,5 +15,5 @@ pub fn init() {
     heap::init(); 
     use crate::println; 
     println!("[[mod]] memory has been initialized. "); 
-    println!("The sheep_nucleus end address is {}. ", *KERNEL_END_ADDRESS);
+    // println!("The sheep_nucleus end address is {}. ", *KERNEL_END_ADDRESS);
 }

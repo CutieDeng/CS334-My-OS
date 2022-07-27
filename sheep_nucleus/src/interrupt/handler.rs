@@ -3,7 +3,6 @@ use core::panic;
 use crate::println;
 
 use super::context::Context; 
-use riscv::register::{scause::Trap}; 
 
 core::arch::global_asm!(include_str!("./interrupt.asm")); 
 
@@ -19,28 +18,6 @@ pub fn init() {
         core::arch::asm!("csrw stvec, {}", in(reg) r); 
     }
     println!("[[mod]] interrupt.handler has been initialized. "); 
-}
-
-/// 中断的处理入口
-/// 
-/// *interrupt.asm* 首先保存寄存器至 Context, 其作为参数和 scause 以及 stval 一并传入此函数
-/// 具体的中断类型需要根据 scause 来推断，然后分别处理。
-#[no_mangle]
-pub fn handle_interrupt(context: &mut Context, scause: riscv::register::scause::Scause, stval: usize) {
-    use riscv::register::scause; 
-    match scause.cause() {
-
-        // 断点中断 ebreak. 
-        Trap::Exception(scause::Exception::Breakpoint) => breakpoint(context), 
-
-        // 时钟中断 
-        Trap::Interrupt(scause::Interrupt::SupervisorTimer) => supervisor_timer(context), 
-        
-        // 其他情况
-        _ => {
-            panic!("Unresolved interrupt: {:?}\n{:x?}\nstval: {:x}", scause.cause(), context, stval); 
-        }
-    }
 }
 
 /// 临时使用的中断处理入口
@@ -70,13 +47,14 @@ extern "C" fn handle_interrupt_backup(context: &mut Context, scause: usize, stva
 
         // 时钟中断
         Cause::Interrupt(5) => {
+            #[cfg(feature = "time-enabled")]
             supervisor_timer(context); 
         }
 
         // 其他情况
         _ => {
-            // panic!("Unresolved interrupt: {:?}\n{:x?}\nstval: {:x}", scause.cause(), context, stval); 
-            unimplemented!("Still need to finish. "); 
+            panic!("Unresolved interrupt: {:?}\n{:x?}\nstval: {:x}", scause.get_cause(), context, stval); 
+            // unimplemented!("Still need to finish. "); 
         }
     }
 }
@@ -93,6 +71,7 @@ fn breakpoint(context: &mut Context) {
 /// 处理时钟中断
 /// 
 /// 目前只会在 [`timer`] 模块中进行计数
+#[cfg(feature = "time-enabled")]
 fn supervisor_timer(_: &Context) {
     use super::*; 
     timer::tick();  
@@ -100,6 +79,7 @@ fn supervisor_timer(_: &Context) {
 
 mod cause {
 
+    #[derive(Debug)]
     pub enum Cause {
         Interrupt(usize), 
         Exception(usize), 

@@ -5,60 +5,66 @@
 extern crate alloc; 
 extern crate log;
 
-use alloc::boxed::Box;
-use alloc::vec::Vec;
 use log::LevelFilter;
-use crate::sheep_logger::SheepLogger;
 
 core::arch::global_asm!(include_str!("entry.asm")); 
 
-mod sbi;
-mod interrupt;
-mod memory;
-mod console;
-mod panic;
+use sheep_nucleus::*; 
+
 mod sheep_logger;
 
+#[inline(always)] 
+#[allow(dead_code)]
 unsafe fn ebreak() {
     use core::arch::asm; 
     asm!("ebreak"); 
 }
+
 #[no_mangle]
 pub extern "C" fn rust_main() -> ! {
     interrupt::init(); 
+    {
+        let mut a: usize; 
+        unsafe {
+            core::arch::asm!("csrr {}, satp", out(reg) a); 
+        }
+        println!("satp: 0x{:x}", a); 
+        unsafe {
+            core::arch::asm!("mv {}, sp", out(reg) a); 
+        }
+        println!("sp: 0x{:x}", a); 
+        extern "C" {
+            fn kernel_end(); 
+        }
+        println!("END of kernel: 0x{:x}", kernel_end as usize); 
+    }
     memory::init();
     sheep_logger::init().expect("日志管理器加载失败！");
     sheep_logger::set_level(LevelFilter::Trace);
-    log::error!("This is an error message.");
-    log::warn!("This is an warning message.");
-    log::info!("This is an info message.");
-    log::debug!("This is an warning message.");
-    log::trace!("This is an trace message.");
-    color_println!(33);
-
-    eprintln!("打印红色信息测试!");
-    for c in 'A'..='Z'{
-        eprint!("{}", c);
+    if cfg!(feature = "twocat-log-debug-itself") {
+        log::error!("This is an error message.");
+        log::warn!("This is an warning message.");
+        log::info!("This is an info message.");
+        log::debug!("This is an warning message.");
+        log::trace!("This is an trace message.");
+        // .. 
+        eprintln!("打印红色信息测试!");
+        for c in 'A'..='Z'{
+            eprint!("{}", c);
+        }
+        eprintln!();
     }
-    // println!("蓝色信息测试".blue());
-    eprintln!();
-    {
-        println!("栈地址初始位置为：0x{:x}. ", 
-            &0 as *const i32 as usize); 
-    }
-
     println!("你好，我的 rCore. "); 
-
-    println!("内核结束地址：0x{:x}", memory::get_kernel_end()); 
-
-    let mut t = Vec::new();
-    for i in 0..20_000_000 {
-        t.push(0);
-        if i % 100000 == 0 {
-            let p = (&t[i]) as *const i32 as usize;
-            println!("t[{}]'s address is {:x}", i, p);
+    {
+        for i in 0..100000000 {
+            use alloc::boxed::Box; 
+            let t = Box::new(3); 
+            if i % 100000 == 0 {
+                println!("The address is {:p}", t.as_ref()); 
+            }
+            core::mem::forget(t); 
         }
     }
     println!("关机！"); 
-    sbi::shutdown();
+    shutdown();
 }
