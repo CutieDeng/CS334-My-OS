@@ -10,7 +10,6 @@ use log::LevelFilter;
 core::arch::global_asm!(include_str!("entry.asm")); 
 
 use sheep_nucleus::*; 
-
 mod sheep_logger;
 
 #[inline(always)] 
@@ -40,31 +39,19 @@ pub extern "C" fn rust_main() -> ! {
     }
     memory::init();
     sheep_logger::init().expect("日志管理器加载失败！");
-    sheep_logger::set_level(LevelFilter::Trace);
-    if cfg!(feature = "twocat-log-debug-itself") {
-        log::error!("This is an error message.");
-        log::warn!("This is an warning message.");
-        log::info!("This is an info message.");
-        log::debug!("This is an warning message.");
-        log::trace!("This is an trace message.");
-        // .. 
-        eprintln!("打印红色信息测试!");
-        for c in 'A'..='Z'{
-            eprint!("{}", c);
-        }
-        eprintln!();
-    }
-    println!("你好，我的 rCore. "); 
+    sheep_logger::set_level(LevelFilter::Info);
+    
+    log::info!("你好，我的 rCore. "); 
     {
         for i in 0..100000000 {
             use alloc::boxed::Box; 
             let t = Box::new(3); 
             if i % 100000 == 0 {
-                println!("The address is {:p}", t.as_ref()); 
+                log::warn!("The address is {:p}", t.as_ref()); 
             }
             core::mem::forget(t); 
         }
     }
-    println!("关机！"); 
+    log::warn!("关机！"); 
     shutdown();
 }

@@ -17,11 +17,10 @@ bit_field = "0.10.0"
 #colored = "2.0.0"
 
 [features] 
+# default = ["time-enabled", "test_log"]
 default = ["time-enabled"]
 time-enabled = []
-twocat-log-debug-itself = [] 
-#debug = []
-#info = []
-#warn = []
-#error = []
-#log_level = ["info", "warn", "error"]   # 这里标识程序要显示的所有log类别
+test_log = [] 
+test_virt_mem = []
+test_heap_alloc = []
+
