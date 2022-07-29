@@ -1,4 +1,5 @@
-c: 
+SHELL :=/bin/bash
+c:
 	@cargo c
 
 # 0. 是否对make的流程打日志
@@ -28,12 +29,20 @@ PROJECT_NAME := sheep_nucleus
 KERNEL_ELF := target/$(TARGET)/$(RUSTC_MODE)/$(PROJECT_NAME)
 #make调用objcopy生成
 KERNEL_BIN := target/$(TARGET)/$(RUSTC_MODE)/$(PROJECT_NAME).bin
-
-# 1.3 操作系统的基础执行环境：监督层二进制接口(Supervisor Binary Interface)的定义
+# 1.3.1 选择qemu版本
+QEMU_VERSION ?=7.0-4Ki
+QEMU_BUILD := $(shell pwd)/qemu-bin/qemu-$(QEMU_VERSION)
+set_qemu: $(QEMU_BUILD)
+	@echo "正在设置Qemu为指定版本($(QEMU_VERSION))。"
+	@source ./set_qemu.bash
+	qemu-as-$(QEMU_VERSION)
+	@echo "设置完成。"
+# 1.3.2 操作系统的基础执行环境：监督层二进制接口(Supervisor Binary Interface)的定义
 # 选用的SBI的名称，应当放置同名bin扩展名文件在bootloader文件夹下。可选参数，默认为qemu下模拟运行 rustsbi 。
 SBI ?=rustsbi-qemu
 # 推导出位置
-BOOTLOADER := ./bootloader/$(SBI).bin
+BOOTLOADER ?= ./bootloader/$(SBI).bin
+#BOOTLOADER ?= default
 # 内核代码开始的物理地址，随qemu或者硬件设置可能不同。默认为该地址。
 KERNEL_ENTRY_PA ?= 0x80200000
 
@@ -68,7 +77,7 @@ qemu: build
 	@$(echo) "正在启动qemu模拟器。"
 	@qemu-system-riscv64 \
 		-machine virt \
-		-bios default \
+		-bios $(BOOTLOADER) \
 		-nographic \
 		-device loader,file=$(KERNEL_BIN),addr=$(KERNEL_ENTRY_PA)
 
