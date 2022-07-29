@@ -41,8 +41,8 @@ set_qemu: $(QEMU_BUILD)
 # 选用的SBI的名称，应当放置同名bin扩展名文件在bootloader文件夹下。可选参数，默认为qemu下模拟运行 rustsbi 。
 SBI ?=rustsbi-qemu
 # 推导出位置
-BOOTLOADER ?= ./bootloader/$(SBI).bin
-#BOOTLOADER ?= default
+# BOOTLOADER ?= ./bootloader/$(SBI).bin
+BOOTLOADER ?= default
 # 内核代码开始的物理地址，随qemu或者硬件设置可能不同。默认为该地址。
 KERNEL_ENTRY_PA ?= 0x80200000
 
@@ -72,7 +72,6 @@ clean:
 	@cargo clean
 	@$(echo) "已经清理cargo项目。"
 
-
 qemu: build
 	@$(echo) "正在启动qemu模拟器。"
 	@qemu-system-riscv64 \
@@ -80,8 +79,6 @@ qemu: build
 		-bios $(BOOTLOADER) \
 		-nographic \
 		-device loader,file=$(KERNEL_BIN),addr=$(KERNEL_ENTRY_PA)
-
-# -bios $(BOOTLOADER) \
 
 run: build qemu 
 
