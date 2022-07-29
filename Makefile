@@ -36,16 +36,7 @@ SBI ?=rustsbi-qemu
 BOOTLOADER := ./bootloader/$(SBI).bin
 # 内核代码开始的物理地址，随qemu或者硬件设置可能不同。默认为该地址。
 KERNEL_ENTRY_PA ?= 0x80200000
-# 1.4 cargo 设置
-configure_cargo: .cargo/config.toml
-.cargo/config.toml: .cargo/config_template.toml
-	@$(echo) "正在配置cargo编译参数。"
-	@cp .cargo/config_template.toml .cargo/config.toml
-	@$(echo) "\nrustflags = [\"-C\", \"link-arg=-T$(PROJECT_NAME)/src/linker.ld\", ]">>.cargo/config.toml
-	@$(echo) "配置完成!"
-clean_cargo_config: .cargo/config.toml
-	@rm $^
-	@$(echo) "已清理cargo编译配置。"
+
 # 2. 工具
 OBJDUMP := rust-objdump --arch-name=riscv64
 OBJCOPY := rust-objcopy --binary-architecture=riscv64
@@ -53,7 +44,7 @@ OBJCOPY := rust-objcopy --binary-architecture=riscv64
 # 3.
 .PHONY: doc kernel build clean qemu run asm r c cbuild debug check
 
-build: .cargo/config.toml $(KERNEL_BIN)
+build: $(KERNEL_BIN)
 
 doc: 
 	@cargo doc --document-private-items
@@ -68,7 +59,7 @@ $(KERNEL_BIN): kernel
 asm: 
 	@$(OBJDUMP) -d $(KERNEL_ELF) | less 
 
-clean: clean_cargo_config
+clean: 
 	@cargo clean
 	@$(echo) "已经清理cargo项目。"
 

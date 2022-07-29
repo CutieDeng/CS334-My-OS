@@ -1,6 +1,8 @@
 #![no_std]
 #![feature(panic_info_message, never_type, alloc_error_handler)]
 
+extern crate alloc; 
+
 mod sbi; 
 pub mod console; 
 mod panic; 

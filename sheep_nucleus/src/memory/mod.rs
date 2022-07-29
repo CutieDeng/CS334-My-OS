@@ -17,3 +17,5 @@ pub fn init() {
     println!("[[mod]] memory has been initialized. "); 
     // println!("The sheep_nucleus end address is {}. ", *KERNEL_END_ADDRESS);
 }
+
+pub type MemoryResult<T> = Result<T, &'static str>;
