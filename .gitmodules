@@ -1,3 +1,6 @@
-[submodule "qemu"]
-	path = qemu
-	url = https://github.com/2catycm/qemu.git
+[submodule "qemu-5.0.0"]
+	path = qemu-5.0.0
+	url = https://github.com/2catycm/qemu-5.0.0.git
+[submodule "qemu-bin"]
+	path = qemu-bin
+	url = https://github.com/2catycm/qemu-bin.git

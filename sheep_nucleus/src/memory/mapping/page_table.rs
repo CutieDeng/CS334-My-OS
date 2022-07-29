@@ -1,3 +1,18 @@
+//! 单一页表页面（4K） [`PageTable`]，以及相应封装 [`FrameTracker`] 的 [`PageTableTracker`]
+//!
+//! 每个页表中包含 512 条页表项
+//!
+//! # 页表工作方式
+//! 1.  首先从 `satp` 中获取页表根节点的页号，找到根页表
+//! 2.  对于虚拟地址中每一级 VPN（9 位），在对应的页表中找到对应的页表项
+//! 3.  如果对应项 Valid 位为 0，则发生 Page Fault
+//! 4.  如果对应项 Readable / Writable 位为 1，则表示这是一个叶子节点。
+//!     页表项中的值便是虚拟地址对应的物理页号
+//!     如果此时还没有达到最低级的页表，说明这是一个大页
+//! 5.  将页表项中的页号作为下一级查询目标，查询直到达到最低级的页表，最终得到页号
+
+use super::page_table_entry::PageTableEntry;
+use crate::memory::{address::*, config::PAGE_SIZE, frame::FrameTracker};
 /// 存有 512 个页表项的页表
 ///
 /// 注意我们不会使用常规的 Rust 语法来创建 `PageTable`。相反，我们会分配一个物理页，
@@ -14,9 +29,6 @@ impl PageTable {
         self.entries = [Default::default(); PAGE_SIZE / 8];
     }
 }
-
-use super::PageTableEntry; 
-use crate::{FrameTracker, memory::PhysicalPageNumber, memory::PAGE_SIZE}; 
 
 /// 类似于 [`FrameTracker`]，用于记录某一个内存中页表
 ///
@@ -39,6 +51,8 @@ impl PageTableTracker {
     }
 }
 
+// PageTableEntry 和 PageTableTracker 都可以 deref 到对应的 PageTable
+// （使用线性映射来访问相应的物理地址）
 impl core::ops::Deref for PageTableTracker {
     type Target = PageTable;
     fn deref(&self) -> &Self::Target {
@@ -53,8 +67,9 @@ impl core::ops::DerefMut for PageTableTracker {
 }
 
 // 因为 PageTableEntry 和具体的 PageTable 之间没有生命周期关联，所以返回 'static 引用方便写代码
+// 我拒绝 hhh. 
 impl PageTableEntry {
-    pub fn get_next_table(&self) -> &'static mut PageTable {
+    pub fn get_next_table<'a>(&self) -> &'a mut PageTable {
         self.address().deref_kernel()
     }
 }
