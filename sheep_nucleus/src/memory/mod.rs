@@ -24,7 +24,7 @@ pub fn init() {
     heap::init(); 
     use crate::println; 
     println!("[[mod]] memory has been initialized. "); 
-    // println!("The sheep_nucleus end address is {}. ", *KERNEL_END_ADDRESS);
+    println!("The sheep_nucleus end address is {}. ", *KERNEL_END_ADDRESS);
 }
 
 pub type MemoryResult<T> = Result<T, &'static str>;

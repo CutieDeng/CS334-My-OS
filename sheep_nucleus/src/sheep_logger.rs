@@ -1,5 +1,6 @@
 use crate::color_println;
 use log::{LevelFilter, Record, Level, Metadata, SetLoggerError, Log};
+use sheep_nucleus::*;
 
 /// Implements [`Log`].
 pub struct SheepLogger; 
@@ -42,7 +43,24 @@ pub(super) fn init() -> Result<(), SetLoggerError> {
     log::set_logger(&SheepLogger)
         .map(|()| log::set_max_level(LevelFilter::Info))
 }
+pub fn set_level(level: LevelFilter)->() {
+    log::set_max_level(level);
+    if cfg!(feature = "test_log"){
+        test_can_run();
+    }
+}
 
-pub fn set_level(level: LevelFilter) {
-    log::set_max_level(level)
+// #[cfg(test_log)]
+pub fn test_can_run()->(){
+    log::error!("This is an error message.");
+    log::warn!("This is an warning message.");
+    log::info!("This is an info message.");
+    log::debug!("This is an warning message.");
+    log::trace!("This is an trace message.");
+    // .. 
+    log::info!("打印字母信息测试!");
+    for c in 'A'..='Z'{
+        eprint!("{}", c);
+    }
+    eprintln!();
 }

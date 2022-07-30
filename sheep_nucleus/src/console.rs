@@ -101,3 +101,14 @@ macro_rules! color_println {
         $color $(, $($arg)+)? ))
     }
 }
+
+
+pub fn open_blue_print(){
+    print!("\x1b[44m");
+}
+pub fn close_console_effects(){
+    print!("\x1b[0m");
+}
+pub fn clear_console(){
+    print!("\x1b[2J");
+}

@@ -23,3 +23,7 @@ pub mod memory;
 
 #[cfg(feature = "cutie-io-backup")]
 pub mod debug_helper; 
+
+pub mod prelude {
+    pub use crate::println;
+}
