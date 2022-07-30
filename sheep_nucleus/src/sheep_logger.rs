@@ -2,8 +2,8 @@ use crate::color_println;
 use log::{LevelFilter, Record, Level, Metadata, SetLoggerError, Log};
 
 /// Implements [`Log`].
-pub struct SheepLogger {
-}
+pub struct SheepLogger; 
+
 #[derive(Debug)]
 enum LogColor{
     Red = 31,
@@ -37,12 +37,12 @@ impl Log for SheepLogger {
     }
     fn flush(&self) {}
 }
-static LOGGER: SheepLogger = SheepLogger{};
 
-pub fn init() -> Result<(), SetLoggerError> {
-    log::set_logger(&LOGGER)
+pub(super) fn init() -> Result<(), SetLoggerError> {
+    log::set_logger(&SheepLogger)
         .map(|()| log::set_max_level(LevelFilter::Info))
 }
+
 pub fn set_level(level: LevelFilter) {
     log::set_max_level(level)
 }

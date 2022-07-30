@@ -23,6 +23,7 @@ unsafe fn ebreak() {
 #[no_mangle]
 pub extern "C" fn rust_main() -> ! {
     interrupt::init(); 
+    if false 
     {
         let mut a: usize; 
         unsafe {
@@ -55,16 +56,23 @@ pub extern "C" fn rust_main() -> ! {
         eprintln!();
     }
     println!("你好，我的 rCore. "); 
-    {
-        for i in 0..100000000 {
-            use alloc::boxed::Box; 
-            let t = Box::new(3); 
-            if i % 100000 == 0 {
-                println!("The address is {:p}", t.as_ref()); 
-            }
-            core::mem::forget(t); 
-        }
-    }
+    // {
+    //     for i in 0..100000000 {
+    //         use alloc::boxed::Box; 
+    //         let t = Box::new(3); 
+    //         if i % 100000 == 0 {
+    //             println!("The address is {:p}", t.as_ref()); 
+    //         }
+    //         core::mem::forget(t); 
+    //     }
+    // }
+    sbi::wait_for_interrupt(); 
+    sbi::wait_for_interrupt(); 
+    sbi::wait_for_interrupt(); 
     println!("关机！"); 
     shutdown();
+}
+
+trait Run {
+    fn run(); 
 }

@@ -3,7 +3,16 @@ mod heap;
 mod address; 
 mod frame; 
 mod range; 
-mod mapping; 
+
+#[cfg(feature = "cutie-custom-mapping")] 
+mod mapping_self; 
+#[cfg(feature = "cutie-custom-mapping")] 
+use mapping_self as mapping; 
+
+#[cfg(not(feature = "cutie-custom-mapping"))] 
+mod mapping_std; 
+#[cfg(not(feature = "cutie-custom-mapping"))]
+use mapping_std as mapping; 
 
 pub use config::*; 
 pub use address::*; 

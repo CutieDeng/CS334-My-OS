@@ -1,3 +1,6 @@
+//! 上下文支持
+
+/// 可执行上下文内容
 #[repr(C)]
 #[derive(Debug)]
 pub struct Context {

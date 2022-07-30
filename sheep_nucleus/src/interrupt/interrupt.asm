@@ -66,7 +66,6 @@ __restore:
     LOAD s1, 32 
     LOAD s2, 33 
     csrw sstatus, s1 
-    # csrw scause, s2 
     csrw sepc, s2
 
     # 恢复通用寄存器

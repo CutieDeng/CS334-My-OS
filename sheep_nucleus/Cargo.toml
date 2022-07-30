@@ -17,12 +17,8 @@ bit_field = "0.10.0"
 #colored = "2.0.0"
 
 [features] 
-default = ["time-enabled"]
-time-enabled = []
+default = []
+time-disabled = []
 twocat-log-debug-itself = [] 
 cutie-io-backup = []
-#debug = []
-#info = []
-#warn = []
-#error = []
-#log_level = ["info", "warn", "error"]   # 这里标识程序要显示的所有log类别
+cutie-custom-mapping = [] 

@@ -32,17 +32,17 @@ impl Write for Stdout {
 
 /// 打印由 [`core::format_args!`] 格式化后的数据。
 ///
-/// [`print!`] 和 [`println!`] 宏都将展开成此函数。
+/// `print!` 和 `println!` 宏都将展开成此函数。
 ///
 /// 未知的引用：
-/// [`core::format_args!`]: https://doc.rust-lang.org/nightly/core/macro.format_args.html 
+/// [`core::format_args!`]: <https://doc.rust-lang.org/nightly/core/macro.format_args.html>
 pub fn print(args: fmt::Arguments) {
     Stdout.write_fmt(args).unwrap();
 }
 
 /// 实现类 std 的宏 print! 
 ///
-/// 使用实现了 [`core::fmt::Write`] trait 的 [`console::Stdout`]. 
+/// 使用实现了 [`core::fmt::Write`] trait 的 `console::Stdout`. 
 #[macro_export]
 macro_rules! print {
     ($fmt: literal $(, $($args: tt)+)?) => {
