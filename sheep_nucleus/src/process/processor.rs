@@ -24,7 +24,7 @@ lazy_static! {
 /// 不断让 CPU 进入休眠等待下一次中断
 unsafe fn wait_for_interrupt() {
     loop {
-        asm!("wfi");
+        asm!("wfi"); 
     }
 }
 

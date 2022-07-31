@@ -8,3 +8,9 @@ pub struct Context {
     pub sstatus: usize, 
     pub sepc: usize, 
 }
+
+impl Context {
+    pub fn new (sp: usize, pc: usize, args: Option<&[usize]>, is_user: bool) -> Self {
+        unimplemented!()
+    }
+}

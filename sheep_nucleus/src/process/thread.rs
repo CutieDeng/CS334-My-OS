@@ -1,6 +1,7 @@
 //! 线程 [`Thread`]
 
 use super::*;
+use crate::memory::mapping::*; 
 use core::hash::{Hash, Hasher};
 
 /// 线程 ID 使用 `isize`，可以用负数表示错误

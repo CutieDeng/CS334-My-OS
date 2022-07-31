@@ -26,7 +26,6 @@ impl<T> Lock<T> {
     pub fn lock(&self) -> LockGuard<'_, T> {
         let sstatus: usize;
         unsafe {
-            // llvm_asm!("csrrci $0, sstatus, 1 << 1" : "=r"(sstatus) ::: "volatile");
             asm!("csrrci {}, sstatus, 1 << 1", in(reg) sstatus); 
         }
         LockGuard {
@@ -40,10 +39,7 @@ impl<T> Lock<T> {
 impl<'a, T> Drop for LockGuard<'a, T> {
     fn drop(&mut self) {
         self.guard.take();
-        // unsafe { llvm_asm!("csrs sstatus, $0" :: "r"(self.sstatus & 2) :: "volatile") };
-        unsafe {
-            asm!("csrs sstatus, {}", in(reg) {self.sstatus & 2}); 
-        }
+        unsafe { asm!("csrs sstatus, {}", in(reg) {self.sstatus & 2}); }
     }
 }
 
