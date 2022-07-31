@@ -41,7 +41,7 @@ pub(super) fn init() {
 }
 
 /// buddy-system 内核内存空间控制器
-mod cutie_heap {
+pub mod cutie_heap {
     pub struct CutieHeap; 
 
     unsafe impl alloc::alloc::GlobalAlloc for CutieHeap {

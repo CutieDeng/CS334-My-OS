@@ -1,8 +1,17 @@
 #![no_std]
 #![no_main]
-#![feature(panic_info_message, never_type, alloc_error_handler, custom_test_frameworks)]
+#![feature(panic_info_message, never_type, alloc_error_handler, )]
+#![feature (custom_test_frameworks)]
 #![test_runner(crate::test_runner)]
-#![reexport_test_harness_main = "test_runner"]
+#![reexport_test_harness_main = "test_main"]
+
+#[cfg(test)] 
+fn test_runner(tests: &[&dyn Fn()]) {
+    println!("Running {} tests. ", tests.len()); 
+    for test in tests {
+        test(); 
+    }
+}
 
 extern crate alloc; 
 extern crate log;
@@ -51,6 +60,9 @@ pub extern "C" fn rust_main() -> ! {
 
     sheep_logger::init().expect("日志管理器加载失败！");
     sheep_logger::set_level(LevelFilter::Info);
+
+    #[cfg(test)]
+    test_main(); 
 
     log::info!("你好，我的 rCore. "); 
 

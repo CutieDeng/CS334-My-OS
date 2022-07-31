@@ -1,16 +1,7 @@
 #![no_std]
 #![feature(prelude_import, panic_info_message, never_type, alloc_error_handler, custom_test_frameworks)]
-// #![test_runner(crate::test_runner)]
 
 extern crate alloc; 
-
-#[cfg(test)] 
-fn test_runner(tests: &[&dyn Fn()]) {
-    println!("Running {} tests. ", tests.len()); 
-    for test in tests {
-        test(); 
-    }
-}
 
 pub mod sbi; 
 /// 提供常用的 sbi 函数——关机，输出。
