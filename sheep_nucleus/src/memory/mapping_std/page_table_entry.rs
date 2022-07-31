@@ -71,7 +71,7 @@ impl PageTableEntry {
     /// 是否为空（可能非空也非 Valid）
     /// 
     /// 有意义嘛？ -- cutie deng
-    #[deprecated]
+    // #[deprecated]
     pub fn is_empty(&self) -> bool {
         self.0 == 0
     }

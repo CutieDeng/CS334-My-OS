@@ -16,13 +16,16 @@ fn test_runner(tests: &[&dyn Fn()]) {
 extern crate alloc; 
 extern crate log;
 
+use core::arch::asm;
+
 use log::LevelFilter;
 
 // #[macro_use(print, println)]
 // extern crate sheep_nucleus as sn; 
 
 // use sn::*; 
-use sheep_nucleus::*; 
+use sheep_nucleus::{*, process::{PROCESSOR, Process, Thread}}; 
+use alloc::sync::Arc;
 
 core::arch::global_asm!(include_str!("entry.asm")); 
 
@@ -55,15 +58,21 @@ pub extern "C" fn rust_main() -> ! {
         println!("END of kernel: 0x{:x}", kernel_end as usize); 
     }
     memory::init();
+    process::init(); 
     let remap = memory::mapping::MemorySet::new_kernel().unwrap(); 
     remap.activate(); 
 
     // println!("test"); 
-
     sheep_logger::init().expect("日志管理器加载失败！");
     sheep_logger::set_level(LevelFilter::Trace);
 
     log::info!("kernel remap! "); 
+
+    unsafe { ebreak(); } 
+    // loop {} 
+    
+    let mut k = 0; 
+    for _ in 0..1000000000 { k += 1; k = 0; } 
 
     if true {
         // 内核重映射测试
@@ -124,27 +133,38 @@ pub extern "C" fn rust_main() -> ! {
 
     log::info!("你好，我的 rCore. "); 
 
-    // for _ in 0..100000 
-    {
-        // let c = memory::frame::FRAME_ALLOCATOR.lock().alloc().unwrap();
-        // log::info!("The address of c is {}", c.address()); 
-        // core::mem::forget(c); 
+    extern "C" {
+        fn __restore (context: usize); 
     }
-    
-    // {
-    //     for i in 0..100000000 {
-    //         use alloc::boxed::Box; 
-    //         let t = Box::new(3); 
-    //         if i % 100000 == 0 {
-    //             log::warn!("The address is {:p}", t.as_ref()); 
-    //         }
-    //         core::mem::forget(t); 
-    //     }
-    // }
-    log::warn!("关机！"); 
-    shutdown();
+
+    use sheep_nucleus::process::PROCESSOR; 
+    let context = PROCESSOR.lock().prepare_next_thread(); 
+    unsafe {
+        __restore(context as usize); 
+    }
+
+    unreachable!(); 
 }
 
 trait Run {
     fn run(); 
+}
+
+fn kernel_thread_exit() {
+    PROCESSOR.lock().current_thread().as_ref().inner().dead = true; 
+    unsafe {
+        asm!("ebreak"); 
+    }
+}
+
+pub fn create_kernel_thread (
+    process: Arc<Process>, 
+    entry_point: usize, 
+    arguments: Option<&[usize]>, 
+) -> Arc<Thread> {
+    // 创建进程
+    let thread = Thread::new(process, entry_point, arguments).unwrap(); 
+    // 设置进程的返回地址为 kernel thread exit. 
+    thread.as_ref().inner().context.as_mut().unwrap().set_ra(kernel_thread_exit as usize); 
+    thread
 }

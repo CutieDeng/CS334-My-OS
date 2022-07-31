@@ -26,13 +26,13 @@ pub(super) fn init() {
 /// scause, stval 在此处的改动不会影响到 s-trap 系 寄存器的值
 /// context 内值的变化将会在函数执行结束后影响程式执行现场的内容 
 #[no_mangle]
-extern "C" fn handle_interrupt_backup(context: &mut Context, scause: usize, stval: usize) { 
+extern "C" fn handle_interrupt_backup(context: &mut Context, scause: usize, stval: usize) -> *mut Context { 
     use self::cause::*; 
     match scause.get_cause() {
         // 断点异常
         Cause::Exception(3) => {
             // println!("获取断点～"); 
-            breakpoint(context); 
+            breakpoint(context)
         }
 
         // 无法访问 (load) 指定数据段地址 
@@ -47,7 +47,7 @@ extern "C" fn handle_interrupt_backup(context: &mut Context, scause: usize, stva
         #[cfg(not(feature = "time-disabled"))]
         // 时钟中断
         Cause::Interrupt(5) => {
-            supervisor_timer(context); 
+            supervisor_timer(context)
         }
 
         // 其他情况
@@ -61,18 +61,23 @@ extern "C" fn handle_interrupt_backup(context: &mut Context, scause: usize, stva
 /// 处理 ebreak 断点
 /// 
 /// 继续执行，其中 `sepc` 增加 2 字节，以跳过当前这条 `ebreak` 指令
-fn breakpoint(context: &mut Context) {
+fn breakpoint(context: &mut Context) -> *mut Context{
     println!("Breakpoint at 0x{:x}", context.sepc); 
     context.sepc += 2;
+    context 
 }
 
 /// 处理时钟中断
 /// 
 /// 目前只会在 [`super::timer`] 模块中进行计数
 #[cfg(not(feature = "time-disabled"))]
-fn supervisor_timer(_: &Context) {
+fn supervisor_timer(a: &mut Context) -> *mut Context {
+    use crate::process::PROCESSOR;
+
     use super::*; 
     timer::tick();  
+    PROCESSOR.lock().park_current_thread(a); 
+    PROCESSOR.lock().prepare_next_thread()
 }
 
 mod cause {

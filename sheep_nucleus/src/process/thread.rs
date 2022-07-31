@@ -2,13 +2,13 @@
 
 use super::*;
 use crate::memory::mapping::*; 
-use core::hash::{Hash, Hasher};
+use core::{hash::{Hash, Hasher}, sync::atomic::AtomicIsize};
 
 /// 线程 ID 使用 `isize`，可以用负数表示错误
 pub type ThreadID = isize;
 
 /// 线程计数，用于设置线程 ID
-static mut THREAD_COUNTER: ThreadID = 0;
+static THREAD_COUNTER: AtomicIsize = AtomicIsize::new(0);
 
 /// 线程的信息
 pub struct Thread {
@@ -68,11 +68,11 @@ impl Thread {
         let context = Context::new(stack.end.into(), entry_point, arguments, process.is_user);
 
         // 打包成线程
+        use core::sync::atomic::Ordering; 
         let thread = Arc::new(Thread {
-            id: unsafe {
-                THREAD_COUNTER += 1;
-                THREAD_COUNTER
-            },
+            id: 
+                THREAD_COUNTER.fetch_add(1, Ordering::Relaxed) + 1
+            ,
             stack,
             process,
             inner: Mutex::new(ThreadInner {

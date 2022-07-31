@@ -25,7 +25,7 @@ pub(super) fn init() {
         // sstatus::set_sie(); 
         use arch::asm; 
         // 内联汇编实现
-        asm!("csrr {p}, sie", "ori {p}, {p}, 0x20", "csrw sie, {p}", p = out(reg) _); 
+        // asm!("csrr {p}, sie", "ori {p}, {p}, 0x20", "csrw sie, {p}", p = out(reg) _); 
         asm!("csrr {s}, sstatus", "ori {s}, {s}, 0x2", "csrw sstatus, {s}", s = out(reg) _); 
     }
     // p(); 

@@ -26,7 +26,7 @@ impl<T> Lock<T> {
     pub fn lock(&self) -> LockGuard<'_, T> {
         let sstatus: usize;
         unsafe {
-            asm!("csrrci {}, sstatus, 1 << 1", in(reg) sstatus); 
+            asm!("csrrci {}, sstatus, 1 << 1", out(reg) sstatus); 
         }
         LockGuard {
             guard: Some(self.0.lock()),

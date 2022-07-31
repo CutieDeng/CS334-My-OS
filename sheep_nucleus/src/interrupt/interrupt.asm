@@ -26,6 +26,7 @@
 # 保存 Context 并且进入 Rust 中的中断处理函数 interrupt::handler::handle_interrupt() 
 
 __interrupt: 
+    csrrw sp, sscratch, sp
     # 在栈上开辟 Context 所需的空间
     addi sp, sp, -34 * 8
 
@@ -69,6 +70,10 @@ __restore:
     csrw sstatus, s1 
     csrw sepc, s2
 
+    # 将内核栈地址写入 sscratch
+    addi    t0, sp, CONTEXT_SIZE * REG_SIZE
+    csrw    sscratch, t0 
+
     # 恢复通用寄存器
     LOAD x1, 1
     # 恢复 x3 至 x31 
@@ -79,4 +84,7 @@ __restore:
     .endr 
 
     LOAD x2, 2
+
+    # csrrw sp, sscratch, sp 
+    
     sret 

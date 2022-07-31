@@ -109,7 +109,7 @@ impl Processor {
 
     /// 保存当前线程的 `Context`
     pub fn park_current_thread(&mut self, context: &Context) {
-        self.current_thread().park(*context);
+        self.current_thread().park(context.clone());
     }
 
     /// 令当前线程进入休眠

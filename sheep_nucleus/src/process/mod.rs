@@ -20,3 +20,7 @@ pub use lock::Lock;
 pub use process::Process;
 pub use processor::PROCESSOR;
 pub use thread::Thread;
+
+pub fn init() {
+    kernel_stack::init();
+}
