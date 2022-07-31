@@ -62,6 +62,7 @@ __interrupt:
 # 离开中断
 # 从 Context 中恢复所有寄存器，并跳转至 Context 中的 sepc 位置
 __restore: 
+    mv sp, a0
     # 恢复 csr 
     LOAD s1, 32 
     LOAD s2, 33 

@@ -1,5 +1,7 @@
 //! 一个关闭中断的互斥锁 [`Lock`]
 
+use core::arch::asm;
+
 use spin::{Mutex, MutexGuard};
 
 /// 关闭中断的互斥锁
@@ -24,7 +26,8 @@ impl<T> Lock<T> {
     pub fn lock(&self) -> LockGuard<'_, T> {
         let sstatus: usize;
         unsafe {
-            llvm_asm!("csrrci $0, sstatus, 1 << 1" : "=r"(sstatus) ::: "volatile");
+            // llvm_asm!("csrrci $0, sstatus, 1 << 1" : "=r"(sstatus) ::: "volatile");
+            asm!("csrrci {}, sstatus, 1 << 1", in(reg) sstatus); 
         }
         LockGuard {
             guard: Some(self.0.lock()),
@@ -37,7 +40,10 @@ impl<T> Lock<T> {
 impl<'a, T> Drop for LockGuard<'a, T> {
     fn drop(&mut self) {
         self.guard.take();
-        unsafe { llvm_asm!("csrs sstatus, $0" :: "r"(self.sstatus & 2) :: "volatile") };
+        // unsafe { llvm_asm!("csrs sstatus, $0" :: "r"(self.sstatus & 2) :: "volatile") };
+        unsafe {
+            asm!("csrs sstatus, {}", in(reg) {self.sstatus & 2}); 
+        }
     }
 }
 

@@ -108,11 +108,3 @@ pub fn shutdown() -> ! {
 pub fn set_timer(time: usize) {
     unsafe { sbi_call(SBI_SET_TIMER, time, 0, 0) }; 
 }
-
-/// 等待中断
-/// 
-/// 该函数用于通知处理器目前没有有用的工作。
-#[inline(always)]
-pub fn wait_for_interrupt() {
-    unsafe { arch::asm!("wfi"); } 
-}

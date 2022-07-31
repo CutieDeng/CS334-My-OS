@@ -1,5 +1,7 @@
 //! 实现线程的调度和管理 [`Processor`]
 
+use core::arch::asm;
+
 use super::*;
 use algorithm::*;
 use hashbrown::HashSet;
@@ -22,7 +24,7 @@ lazy_static! {
 /// 不断让 CPU 进入休眠等待下一次中断
 unsafe fn wait_for_interrupt() {
     loop {
-        llvm_asm!("wfi" :::: "volatile");
+        asm!("wfi");
     }
 }
 
