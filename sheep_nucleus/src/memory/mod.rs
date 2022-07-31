@@ -8,7 +8,7 @@ pub mod heap;
 pub mod address; 
 pub use address::*; 
 
-mod frame; 
+pub mod frame; 
 
 /// 用于描述一个区间
 /// 
@@ -17,17 +17,15 @@ pub mod range;
 pub use range::Range; 
 
 #[cfg(feature = "cutie-custom-mapping")] 
-mod mapping_self; 
+pub mod mapping_self; 
 #[cfg(feature = "cutie-custom-mapping")] 
-use mapping_self as mapping; 
+pub use mapping_self as mapping; 
 
 #[cfg(not(feature = "cutie-custom-mapping"))] 
-mod mapping_std; 
+pub mod mapping_std; 
 #[cfg(not(feature = "cutie-custom-mapping"))]
-use mapping_std as mapping; 
+pub use mapping_std as mapping; 
 
-
-pub use frame::*; 
 
 pub fn init() {
     heap::init(); 

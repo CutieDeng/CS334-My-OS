@@ -67,9 +67,12 @@ impl core::ops::DerefMut for PageTableTracker {
 }
 
 // 因为 PageTableEntry 和具体的 PageTable 之间没有生命周期关联，所以返回 'static 引用方便写代码
-// 我拒绝 hhh. 
+// 我拒绝 hhh. -- by cutie deng
 impl PageTableEntry {
     pub fn get_next_table<'a>(&self) -> &'a mut PageTable {
+        // 由于 address 拿到的总是物理地址～... 通过 deref 能够使用线性映射得到结果... 
+        // 为啥呀？
+        // 因为其总处于线性映射段～
         self.address().deref_kernel()
     }
 }

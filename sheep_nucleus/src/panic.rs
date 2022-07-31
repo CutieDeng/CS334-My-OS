@@ -24,7 +24,7 @@ mod u8array {
             self.1 = 0; 
         }
         pub fn as_str(&self) -> &str {
-            crate::println!("Invoke as str with size: {}", self.1); 
+            // crate::println!("Invoke as str with size: {}", self.1); 
             core::str::from_utf8(&self.0[..self.1]).unwrap()
         }
     }
@@ -63,7 +63,7 @@ fn panic_handler(info: &core::panic::PanicInfo) -> ! {
     let mut cached = U8Array::new(&mut cached); 
     let mut tmp: [u8; 128] = unsafe { MaybeUninit::uninit().assume_init() }; 
     let mut tmp = U8Array::new(&mut tmp); 
-    let _ = cached.write_str("\x1b[2J\x1b[1K"); 
+    // let _ = cached.write_str("\x1b[2J\x1b[1K"); 
     let mid_print = |w: &mut U8Array, s: &str| -> bool { 
         let len = s.chars().map(|a| if a.is_ascii() {1} else if a.is_control() {0} else {2}).sum::<usize>(); 
         // println!("Read '{}', len = {}. ", s, s.len()); 

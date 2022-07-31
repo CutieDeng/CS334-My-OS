@@ -2,7 +2,7 @@
 
 use core::panic;
 use crate::println;
-use super::context; 
+use super::context::Context; 
 
 core::arch::global_asm!(include_str!("./interrupt.asm")); 
 
@@ -26,7 +26,7 @@ pub(super) fn init() {
 /// scause, stval 在此处的改动不会影响到 s-trap 系 寄存器的值
 /// context 内值的变化将会在函数执行结束后影响程式执行现场的内容 
 #[no_mangle]
-extern "C" fn handle_interrupt_backup(context: &mut context::Context, scause: usize, stval: usize) { 
+extern "C" fn handle_interrupt_backup(context: &mut Context, scause: usize, stval: usize) { 
     use self::cause::*; 
     match scause.get_cause() {
         // 断点异常
@@ -61,7 +61,7 @@ extern "C" fn handle_interrupt_backup(context: &mut context::Context, scause: us
 /// 处理 ebreak 断点
 /// 
 /// 继续执行，其中 `sepc` 增加 2 字节，以跳过当前这条 `ebreak` 指令
-fn breakpoint(context: &mut context::Context) {
+fn breakpoint(context: &mut Context) {
     println!("Breakpoint at 0x{:x}", context.sepc); 
     context.sepc += 2;
 }
@@ -70,7 +70,7 @@ fn breakpoint(context: &mut context::Context) {
 /// 
 /// 目前只会在 [`super::timer`] 模块中进行计数
 #[cfg(not(feature = "time-disabled"))]
-fn supervisor_timer(_: &context::Context) {
+fn supervisor_timer(_: &Context) {
     use super::*; 
     timer::tick();  
 }
@@ -99,3 +99,38 @@ mod cause {
     }
 
 }
+
+// /// 处理缺页异常
+// ///
+// /// todo: 理论上这里需要判断访问类型，并与页表中的标志位进行比对
+// fn page_fault(context: &mut Context, scause: usize, stval: usize) -> *mut Context {
+//     static mut COUNT: usize = 0;
+//     println!("page_fault {}", unsafe {
+//         COUNT += 1;
+//         COUNT
+//     });
+//     let current_thread = PROCESSOR.lock().current_thread();
+//     let memory_set = &mut current_thread.process.inner().memory_set;
+//     match memory_set.mapping.handle_page_fault(stval) {
+//         Ok(_) => {
+//             memory_set.activate();
+//             context
+//         }
+//         Err(msg) => fault(msg, scause, stval),
+//     }
+// }
+
+// / 出现未能解决的异常，终止当前线程
+// fn fault(msg: &str, scause: usize, stval: usize) -> *mut Context {
+//     println!(
+//         "{:#x?} terminated: {}",
+//         PROCESSOR.lock().current_thread(),
+//         msg
+//     );
+//     use cause::GetCause; 
+//     println!("cause: {:?}, stval: {:x}", scause.get_cause(), stval);
+
+//     PROCESSOR.lock().kill_current_thread();
+//     // 跳转到 PROCESSOR 调度的下一个线程
+//     PROCESSOR.lock().prepare_next_thread()
+// }

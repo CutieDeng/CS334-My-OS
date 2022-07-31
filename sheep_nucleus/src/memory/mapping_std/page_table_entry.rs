@@ -69,6 +69,9 @@ impl PageTableEntry {
         unsafe { Flags::from_bits_unchecked(self.0.get_bits(..8) as u8) }
     }
     /// 是否为空（可能非空也非 Valid）
+    /// 
+    /// 有意义嘛？ -- cutie deng
+    #[deprecated]
     pub fn is_empty(&self) -> bool {
         self.0 == 0
     }

@@ -130,31 +130,80 @@ impl Mapping {
     pub fn find_entry(&mut self, vpn: VirtualPageNumber) -> MemoryResult<&mut PageTableEntry> {
         // 从根页表开始向下查询
         // 这里不用 self.page_tables[0] 避免后面产生 borrow-check 冲突（我太菜了）
-        let root_table: &mut PageTable = PhysicalAddress::from(self.root_ppn).deref_kernel();
-        let mut entry = &mut root_table.entries[vpn.levels()[0]];
-        for vpn_slice in &vpn.levels()[1..] {
-            if entry.is_empty() {
-                // 如果页表不存在，则需要分配一个新的页表
-                let new_table = PageTableTracker::new(FRAME_ALLOCATOR.lock().alloc()?);
-                let new_ppn = new_table.page_number();
-                // 将新页表的页号写入当前的页表项
-                *entry = PageTableEntry::new(Some(new_ppn), Flags::VALID);
-                // 保存页表
-                self.page_tables.push(new_table);
+        if cfg!(feature = "cutie-support-memory-mapping") {
+            let l = vpn.levels(); 
+            // let mut root_table: &mut PageTable = PhysicalAddress::from(self.root_ppn).deref_kernel();
+            let mut root_table = self.page_tables[0].entries[l[0]].get_next_table(); 
+            for v in 1..l.len() { 
+                let entry = &mut root_table.entries[l[v]]; 
+                if !entry.is_valid() {
+                    let new_table = PageTableTracker::new(FRAME_ALLOCATOR.lock().alloc()?); 
+                    *entry = PageTableEntry::new(Some(new_table.page_number()), Flags::VALID); 
+                    self.page_tables.push(new_table); 
+                }
+                if v + 1 == l.len() {
+                    return Ok(entry); 
+                }
+                assert! (entry.has_next_level(), "大页映射键值对无法在 find_entry 函数中解析"); 
+                root_table = entry.get_next_table(); 
             }
-            // 进入下一级页表（使用偏移量来访问物理地址）
-            entry = &mut entry.get_next_table().entries[*vpn_slice];
+            unreachable!(); 
+        } else {
+            let root_table: &mut PageTable = PhysicalAddress::from(self.root_ppn).deref_kernel();
+            let mut entry = &mut root_table.entries[vpn.levels()[0]];
+            for vpn_slice in &vpn.levels()[1..] {
+                if entry.is_empty() {
+                    // 如果页表不存在，则需要分配一个新的页表
+                    let new_table = PageTableTracker::new(FRAME_ALLOCATOR.lock().alloc()?);
+                    let new_ppn = new_table.page_number();
+                    // 将新页表的页号写入当前的页表项
+                    *entry = PageTableEntry::new(Some(new_ppn), Flags::VALID);
+                    // 保存页表
+                    self.page_tables.push(new_table);
+                }
+                // 进入下一级页表（使用偏移量来访问物理地址）
+                entry = &mut entry.get_next_table().entries[*vpn_slice];
+            }
+            // 此时 entry 位于第三级页表
+            Ok(entry)
         }
-        // 此时 entry 位于第三级页表
-        Ok(entry)
+    }
+
+    pub fn crate_pte(vpn: VirtualPageNumber) -> Option<PageTableEntry> {
+        let mut current_ppn;
+        {
+            unsafe {
+                // llvm_asm!("csrr $0, satp" : "=r"(current_ppn) ::: "volatile");
+                core::arch::asm!("csrr {}, satp", out(reg) current_ppn); 
+            }
+            current_ppn ^= 8 << 60;
+        }
+
+        let root_table: &PageTable =
+            PhysicalAddress::from(PhysicalPageNumber(current_ppn)).deref_kernel();
+        let mut entry = &root_table.entries[vpn.levels()[0]];
+        // 为了支持大页的查找，我们用 length 表示查找到的物理页需要加多少位的偏移
+        for &vpn_slice in &vpn.levels()[1..] {
+            if entry.is_empty() {
+                return None;
+            }
+            if entry.has_next_level() {
+                entry = &mut entry.get_next_table().entries[vpn_slice];
+            } else {
+                break;
+            }
+        }
+        Some(*entry)
     }
 
     /// 查找虚拟地址对应的物理地址
     pub fn lookup(va: VirtualAddress) -> Option<PhysicalAddress> {
         let mut current_ppn;
-        unsafe {
-            // llvm_asm!("csrr $0, satp" : "=r"(current_ppn) ::: "volatile");
-            core::arch::asm!("csrr {}, satp", out(reg) current_ppn); 
+        {
+            unsafe {
+                // llvm_asm!("csrr $0, satp" : "=r"(current_ppn) ::: "volatile");
+                core::arch::asm!("csrr {}, satp", out(reg) current_ppn); 
+            }
             current_ppn ^= 8 << 60;
         }
 
@@ -164,13 +213,13 @@ impl Mapping {
         let mut entry = &root_table.entries[vpn.levels()[0]];
         // 为了支持大页的查找，我们用 length 表示查找到的物理页需要加多少位的偏移
         let mut length = 12 + 2 * 9;
-        for vpn_slice in &vpn.levels()[1..] {
+        for &vpn_slice in &vpn.levels()[1..] {
             if entry.is_empty() {
                 return None;
             }
             if entry.has_next_level() {
                 length -= 9;
-                entry = &mut entry.get_next_table().entries[*vpn_slice];
+                entry = &mut entry.get_next_table().entries[vpn_slice];
             } else {
                 break;
             }
@@ -192,6 +241,8 @@ impl Mapping {
         assert!(entry.is_empty(), "virtual address is already mapped");
         // 页表项为空，则写入内容
         *entry = PageTableEntry::new(ppn, flags);
+        // 问题，其对应的物理页为什么没有加入到 frame 控制中？ -- cutie deng
         Ok(())
     }
 }
+

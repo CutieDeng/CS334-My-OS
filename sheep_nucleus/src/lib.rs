@@ -17,7 +17,7 @@ pub mod console;
 /// panic 库不应该暴露给使用者使其了解实现细节。
 mod panic; 
 
-pub use memory::FrameTracker; 
+pub use memory::frame::FrameTracker; 
 
 pub mod interrupt;
 pub mod memory; 

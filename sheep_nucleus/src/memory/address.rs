@@ -145,9 +145,9 @@ implement_usize_operations! {VirtualPageNumber}
 
 impl PhysicalAddress {
     /// 从物理地址经过线性映射取得 &mut 引用
-    pub fn deref_kernel<T>(self) -> &'static mut T {
-        println!(""); 
-        VirtualAddress::from(self).deref()
+    pub fn deref_kernel<'a, T>(self) -> &'a mut T {
+        // 事实上，物理地址的解引用需要先得到相应的内核虚拟地址才能进一步转化
+        VirtualAddress::from(self).deref::<'a>()
     }
     /// 取得页内偏移
     pub fn page_offset(&self) -> usize {
@@ -209,7 +209,9 @@ impl From<VirtualAddress> for PhysicalAddress {
 
 impl VirtualAddress {
     /// 从虚拟地址取得某类型的 &mut 引用
-    pub fn deref<T>(self) -> &'static mut T {
+    pub fn deref<'a, T>(self) -> &'a mut T {
+        #[cfg(feature = "cutie-log-memory")]
+        println!("Call VirtualAddress::deref with {}", self); 
         unsafe { &mut *(self.0 as *mut T) }
     }
     /// 取得页内偏移

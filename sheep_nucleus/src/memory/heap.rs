@@ -35,12 +35,12 @@ pub(super) fn init() {
     }
     #[cfg(feature = "cutie-log-memory")]
     {
-        use crate::println; 
         println!("[[mod]] memory.heap has been initialized. "); 
     }
 }
 
 /// buddy-system 内核内存空间控制器
+#[deprecated]
 pub mod cutie_heap {
     pub struct CutieHeap; 
 
