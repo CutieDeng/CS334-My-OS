@@ -1,3 +1,8 @@
+//! 内存地址相关信息描述
+//! 
+//! 提供了便利的内存地址之间的相互转换信息
+//! 特别地，通过 sv47 宏调整 bit 的相关设置信息
+
 #[repr(C)]
 #[derive(Copy, Clone, Debug, Default, Eq, PartialEq, PartialOrd, Ord, Hash)] 
 pub struct PhysicalAddress(pub usize); 
@@ -16,11 +21,19 @@ pub struct VirtualPageNumber(pub usize);
 
 impl VirtualPageNumber {
     pub fn levels(self) -> [usize; 3] {
-        [
-            self.0.get_bits(18..27), 
-            self.0.get_bits(9..18), 
-            self.0.get_bits(..9), 
-        ]
+        if cfg!(feature = "sv47") {
+            [
+                self.0.get_bits(22..33), 
+                self.0.get_bits(11..22), 
+                self.0.get_bits(..11), 
+            ]
+        } else {
+            [
+                self.0.get_bits(18..27), 
+                self.0.get_bits(9..18), 
+                self.0.get_bits(..9), 
+            ]
+        }
     }
 }
 
@@ -63,7 +76,6 @@ macro_rules! implement_address_to_page_number {
 implement_address_to_page_number! {PhysicalAddress, PhysicalPageNumber}
 implement_address_to_page_number! {VirtualAddress, VirtualPageNumber}
 
-// quote from RCore 
 /// 为各种仅包含一个 usize 的类型实现运算操作
 macro_rules! implement_usize_operations {
     ($type_name: ty) => {
@@ -134,6 +146,7 @@ implement_usize_operations! {VirtualPageNumber}
 impl PhysicalAddress {
     /// 从物理地址经过线性映射取得 &mut 引用
     pub fn deref_kernel<T>(self) -> &'static mut T {
+        println!(""); 
         VirtualAddress::from(self).deref()
     }
     /// 取得页内偏移

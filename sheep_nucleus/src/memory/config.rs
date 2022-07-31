@@ -20,7 +20,10 @@ extern "C" {
 pub const KERNEL_MAP_OFFSET: usize = 0xFFFF_FFFF_0000_0000; 
 
 /// 页、帧大小，必须是 2^n 
+#[cfg(not(feature = "sv47"))]
 pub const PAGE_SIZE: usize = 4096; 
+#[cfg(feature = "sv47")] 
+pub const PAGE_SIZE: usize = 16384; 
 
 /// 可以访问的内存区域起始地址
 pub const MEMORY_START_ADDRESS: PhysicalAddress = PhysicalAddress(0x8000_0000); 

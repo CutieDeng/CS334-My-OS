@@ -34,7 +34,6 @@ impl Write for Stdout {
 ///
 /// `print!` 和 `println!` 宏都将展开成此函数。
 ///
-/// 未知的引用：
 /// [`core::format_args!`]: <https://doc.rust-lang.org/nightly/core/macro.format_args.html>
 pub fn print(args: fmt::Arguments) {
     Stdout.write_fmt(args).unwrap();

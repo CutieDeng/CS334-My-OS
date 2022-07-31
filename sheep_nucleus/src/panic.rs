@@ -53,6 +53,9 @@ mod u8array {
     }
 }
 
+/// 宽度常量，描述了输出终端的宽度
+const OUTPUT_WIDTH: usize = 140; 
+
 #[panic_handler]
 fn panic_handler(info: &core::panic::PanicInfo) -> ! {
     // console::open_blue_print();
@@ -71,10 +74,10 @@ fn panic_handler(info: &core::panic::PanicInfo) -> ! {
             let _ = write!(w, "\r\n"); 
             return true; 
         }
-        if len > 80 {
+        if len > OUTPUT_WIDTH {
             return false 
         }
-        let sp = (80 - len) / 2; 
+        let sp = (OUTPUT_WIDTH - len) / 2; 
         let _ = write!(w, "\x1b[{}C{}\r\n", sp, s); 
         return true 
     }; 

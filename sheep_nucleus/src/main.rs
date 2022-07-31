@@ -7,9 +7,13 @@ extern crate log;
 
 use log::LevelFilter;
 
+// #[macro_use(print, println)]
+extern crate sheep_nucleus as sn; 
+
+use sn::*; 
+
 core::arch::global_asm!(include_str!("entry.asm")); 
 
-use sheep_nucleus::*; 
 mod sheep_logger;
 
 #[inline(always)] 
@@ -44,7 +48,7 @@ pub extern "C" fn rust_main() -> ! {
 
     sheep_logger::init().expect("日志管理器加载失败！");
     sheep_logger::set_level(LevelFilter::Info);
-    
+
     log::info!("你好，我的 rCore. "); 
     {
         for i in 0..100000000 {

@@ -1,8 +1,14 @@
+//! 内存处理模块
+
 mod config; 
 mod heap; 
-mod address; 
+pub mod address; 
 mod frame; 
-mod range; 
+
+/// 用于描述一个区间
+/// 
+/// 往往和 [`address`] 中的基本区间一同使用，描述一段连续的物理内存地址、物理页、虚拟内存地址、虚拟内存页等..
+pub mod range; 
 
 #[cfg(feature = "cutie-custom-mapping")] 
 mod mapping_self; 
@@ -22,7 +28,6 @@ pub use frame::*;
 
 pub fn init() {
     heap::init(); 
-    use crate::println; 
     println!("[[mod]] memory has been initialized. "); 
     println!("The sheep_nucleus end address is {}. ", *KERNEL_END_ADDRESS);
 }

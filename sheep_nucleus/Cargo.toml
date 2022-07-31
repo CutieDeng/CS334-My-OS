@@ -19,6 +19,8 @@ bit_field = "0.10.0"
 [features] 
 default = []
 time-disabled = []
+sv47 = []
 twocat-log-debug-itself = [] 
 cutie-io-backup = []
 cutie-custom-mapping = [] 
+cutie-log-memory = [] 
