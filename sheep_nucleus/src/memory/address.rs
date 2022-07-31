@@ -156,13 +156,13 @@ impl PhysicalAddress {
 }
 impl VirtualPageNumber {
     /// 从虚拟地址取得页面
-    pub fn deref(self) -> &'static mut [u8; PAGE_SIZE] {
+    pub fn deref<'a> (self) -> &'a mut [u8; PAGE_SIZE] {
         VirtualAddress::from(self).deref()
     }
 }
 impl PhysicalPageNumber {
     /// 从物理地址经过线性映射取得页面
-    pub fn deref_kernel(self) -> &'static mut [u8; PAGE_SIZE] {
+    pub fn deref_kernel<'a> (self) -> &'a mut [u8; PAGE_SIZE] {
         PhysicalAddress::from(self).deref_kernel()
     }
 }

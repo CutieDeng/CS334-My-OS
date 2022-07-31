@@ -8,9 +8,10 @@ extern crate log;
 use log::LevelFilter;
 
 // #[macro_use(print, println)]
-extern crate sheep_nucleus as sn; 
+// extern crate sheep_nucleus as sn; 
 
-use sn::*; 
+// use sn::*; 
+use sheep_nucleus::*; 
 
 core::arch::global_asm!(include_str!("entry.asm")); 
 
@@ -50,6 +51,12 @@ pub extern "C" fn rust_main() -> ! {
     sheep_logger::set_level(LevelFilter::Info);
 
     log::info!("你好，我的 rCore. "); 
+
+    {
+        let c = memory::FRAME_ALLOCATOR.lock().alloc().unwrap();
+        log::info!("The address of c is {}", c.address()); 
+    }
+    
     {
         for i in 0..100000000 {
             use alloc::boxed::Box; 

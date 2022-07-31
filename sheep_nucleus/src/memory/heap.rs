@@ -1,8 +1,9 @@
-use crate::println;
+//! 内核堆管理模块
+//! 
+//! 该模块定义了用户态的堆空间相关的信息并进行管理
+use super::*; 
 
-use super::config::*; 
-
-use buddy_system_allocator::{LockedHeap}; 
+use buddy_system_allocator::LockedHeap; 
 
 /// 进行动态内存分配所用的堆空间
 /// 
@@ -16,7 +17,7 @@ static mut HEAP_SPACE: [u8; KERNEL_HEAP_SIZE] = [0; KERNEL_HEAP_SIZE];
 /// [`LockedHeap`] 实现了 [`alloc::alloc::GlobalAlloc`] trait. 
 /// 可以为全局需要用到堆的地方分配空间。例如 `Box` `Arc` 等
 #[global_allocator]
-static HEAP: LockedHeap<32> = LockedHeap::empty();
+static HEAP: LockedHeap<31> = LockedHeap::empty();
 
 #[alloc_error_handler]
 fn alloc_error_handler(_: core::alloc::Layout) -> ! {
@@ -31,5 +32,24 @@ pub(super) fn init() {
             HEAP_SPACE.as_ptr() as usize, KERNEL_HEAP_SIZE
         )
     }
-    println!("[[mod]] memory.heap has been initialized. "); 
+    #[cfg(feature = "cutie-log-memory")]
+    {
+        use crate::println; 
+        println!("[[mod]] memory.heap has been initialized. "); 
+    }
+}
+
+/// buddy-system 内核内存空间控制器
+mod cutie_heap {
+    pub struct CutieHeap; 
+
+    unsafe impl alloc::alloc::GlobalAlloc for CutieHeap {
+        unsafe fn alloc(&self, _layout: core::alloc::Layout) -> *mut u8 {
+            unimplemented!()
+        }
+
+        unsafe fn dealloc(&self, _ptr: *mut u8, _layout: core::alloc::Layout) {
+            unimplemented!()
+        }
+    }
 }

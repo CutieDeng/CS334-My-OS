@@ -1,6 +1,7 @@
 use spin::Mutex; 
 use algorithm::AllocatorImpl; 
 use super::super::{PhysicalAddress, PhysicalPageNumber, Range}; 
+use crate::memory; 
 use super::frame_tracker::FrameTracker; 
 
 lazy_static::lazy_static! {
@@ -8,7 +9,7 @@ lazy_static::lazy_static! {
         Mutex::new (
             FrameAllocator::new (
                 Range::from(
-                    PhysicalPageNumber::ceil(PhysicalAddress::from(super::super::get_kernel_end()))..PhysicalPageNumber::floor(super::super::MEMORY_END_ADDRESS)
+                    PhysicalPageNumber::ceil(PhysicalAddress::from(*memory::KERNEL_END_ADDRESS))..PhysicalPageNumber::floor(memory::MEMORY_END_ADDRESS)
                 )
             )
         ); 

@@ -4,10 +4,6 @@ use core::fmt::Write;
 use core::mem::MaybeUninit;
 
 use crate::panic::u8array::U8Array;
-/// 打印 panic 信息并 [`crate::shutdown`]. 
-///
-/// ### '#[panic_handler]' 属性
-/// 声明此函数是 panic 的回调。
 
 use crate::println;
 use crate::shutdown; 
@@ -56,6 +52,10 @@ mod u8array {
 /// 宽度常量，描述了输出终端的宽度
 const OUTPUT_WIDTH: usize = 140; 
 
+/// 打印 panic 信息并 [`crate::shutdown`]. 
+///
+/// ### '#[panic_handler]' 属性
+/// 声明此函数是 panic 的回调。
 #[panic_handler]
 fn panic_handler(info: &core::panic::PanicInfo) -> ! {
     // console::open_blue_print();
@@ -63,9 +63,6 @@ fn panic_handler(info: &core::panic::PanicInfo) -> ! {
     let mut cached = U8Array::new(&mut cached); 
     let mut tmp: [u8; 128] = unsafe { MaybeUninit::uninit().assume_init() }; 
     let mut tmp = U8Array::new(&mut tmp); 
-    for _ in 0..20 {
-        let _ = cached.write_str("\x1bD"); 
-    }
     let _ = cached.write_str("\x1b[2J\x1b[1K"); 
     let mid_print = |w: &mut U8Array, s: &str| -> bool { 
         let len = s.chars().map(|a| if a.is_ascii() {1} else if a.is_control() {0} else {2}).sum::<usize>(); 

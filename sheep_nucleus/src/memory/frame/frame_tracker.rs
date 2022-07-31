@@ -1,4 +1,4 @@
-use super::super::*; 
+use crate::memory::*; 
 
 /// 分配出的物理页
 ///
