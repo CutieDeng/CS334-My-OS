@@ -1,6 +1,6 @@
 //! 内核堆管理模块
 //! 
-//! 该模块定义了用户态的堆空间相关的信息并进行管理
+//! 该模块定义了内核态的堆内存空间 (大小为 8M) 相关信息。
 use super::*; 
 
 use buddy_system_allocator::LockedHeap; 
@@ -14,6 +14,7 @@ static mut HEAP_SPACE: [u8; KERNEL_HEAP_SIZE] = [0; KERNEL_HEAP_SIZE];
 /// 堆，动态内存分配器
 /// 
 /// ### `#[global_allocator]` 
+/// 
 /// [`LockedHeap`] 实现了 [`alloc::alloc::GlobalAlloc`] trait. 
 /// 可以为全局需要用到堆的地方分配空间。例如 `Box` `Arc` 等
 #[global_allocator]

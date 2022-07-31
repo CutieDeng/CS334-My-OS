@@ -1,6 +1,8 @@
 #![no_std]
 #![no_main]
-#![feature(panic_info_message, never_type, alloc_error_handler)]
+#![feature(panic_info_message, never_type, alloc_error_handler, custom_test_frameworks)]
+#![test_runner(crate::test_runner)]
+#![reexport_test_harness_main = "test_runner"]
 
 extern crate alloc; 
 extern crate log;
