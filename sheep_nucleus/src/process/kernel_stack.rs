@@ -15,7 +15,7 @@
 //! 从 [`Thread`] 中取出 `Context` 然后置于内核栈顶即可
 
 use super::*;
-use core::{mem::size_of, arch::asm, borrow::Borrow};
+use core::{mem::size_of, arch::asm, };
 
 /// 内核栈
 #[repr(align(16))]
@@ -34,6 +34,7 @@ impl KernelStack {
         let push_address = (stack_top - size_of::<Context>()) as *mut Context;
         unsafe {
             *push_address = context;
+            asm!("csrw sscratch, {}", in(reg) push_address as usize); 
         }
         push_address
     }

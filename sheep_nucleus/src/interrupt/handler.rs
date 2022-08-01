@@ -53,6 +53,7 @@ extern "C" fn handle_interrupt_backup(context: &mut Context, scause: usize, stva
         // 其他情况
         _ => {
             panic!("Unresolved interrupt: {:?}\n{:x?}\nstval: {:x}", scause.get_cause(), context, stval); 
+            // fault("不明异常", scause, stval)
             // unimplemented!("Still need to finish. "); 
         }
     }
@@ -125,17 +126,17 @@ mod cause {
 //     }
 // }
 
-// / 出现未能解决的异常，终止当前线程
-// fn fault(msg: &str, scause: usize, stval: usize) -> *mut Context {
-//     println!(
-//         "{:#x?} terminated: {}",
-//         PROCESSOR.lock().current_thread(),
-//         msg
-//     );
-//     use cause::GetCause; 
-//     println!("cause: {:?}, stval: {:x}", scause.get_cause(), stval);
+fn fault(_msg: &str, scause: usize, stval: usize) -> *mut Context {
+    use crate::process::PROCESSOR; 
+    // println!(
+    //     "{:#x?} terminated: {}",
+    //     PROCESSOR.lock().current_thread(),
+    //     msg
+    // );
+    use cause::GetCause; 
+    println!("cause: {:?}, stval: {:x}", scause.get_cause(), stval);
 
-//     PROCESSOR.lock().kill_current_thread();
-//     // 跳转到 PROCESSOR 调度的下一个线程
-//     PROCESSOR.lock().prepare_next_thread()
-// }
+    PROCESSOR.lock().kill_current_thread();
+    // 跳转到 PROCESSOR 调度的下一个线程
+    PROCESSOR.lock().prepare_next_thread()
+}

@@ -78,8 +78,10 @@ impl Processor {
     pub fn prepare_next_thread(&mut self) -> *mut Context {
         // 向调度器询问下一个线程
         if let Some(next_thread) = self.scheduler.get_next() {
+            println!("[info] 找到下一个进程。"); 
             // 准备下一个线程
             let context = next_thread.prepare();
+            println!("[info] 线程上下文已在 kernel stack 内就绪. "); 
             self.current_thread = Some(next_thread);
             context
         } else {

@@ -22,13 +22,16 @@ pub struct ProcessInner {
 impl Process {
     /// 创建一个内核进程
     pub fn new_kernel() -> MemoryResult<Arc<Self>> {
-        Ok(Arc::new(Self {
+        let result = Ok(Arc::new(Self {
             is_user: false,
             inner: Mutex::new(ProcessInner {
                 memory_set: MemorySet::new_kernel()?,
                 // descriptors: vec![STDIN.clone(), STDOUT.clone()],
             }),
-        }))
+        })); 
+        #[cfg(feature = "cutie-log-process")]
+        println!("获得 new-kernel 结果");
+        result 
     }
 
     /// 创建进程，从文件中读取代码

@@ -28,7 +28,8 @@ impl MemorySet {
             fn data_start();
             fn bss_start();
         }
-
+        #[cfg(feature = "cutie-log-mapping-set")]
+        println!("构建内核重映射"); 
         // 建立字段
         let segments = vec![
             // .text 段，r-x
@@ -63,11 +64,14 @@ impl MemorySet {
             },
         ];
         let mut mapping = Mapping::new()?;
-
+        #[cfg(feature = "cutie-log-mapping-set")]
+        println!("对字段进行映射"); 
         // 每个字段在页表中进行映射
         for segment in segments.iter() {
             mapping.map(segment, None)?;
         }
+        #[cfg(feature = "cutie-log-mapping-set")]
+        println!("映射完成。");
         Ok(MemorySet {
             mapping,
             segments,

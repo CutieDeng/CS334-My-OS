@@ -2,7 +2,7 @@
 
 use super::*;
 use crate::memory::mapping::*; 
-use core::{hash::{Hash, Hasher}, sync::atomic::AtomicIsize};
+use core::{hash::{Hash, Hasher}, sync::atomic::AtomicIsize, arch::asm};
 
 /// 线程 ID 使用 `isize`，可以用负数表示错误
 pub type ThreadID = isize;
@@ -34,17 +34,40 @@ pub struct ThreadInner {
     pub dead: bool,
 }
 
+struct Test; 
+
+impl Drop for Test {
+    fn drop(&mut self) {
+        println!("I drop... "); 
+    }
+}
+
 impl Thread {
     /// 准备执行一个线程
     ///
     /// 激活对应进程的页表，并返回其 Context
     pub fn prepare(&self) -> *mut Context {
+        let _v = Test;
         // 激活页表
+        let v: usize; 
+        unsafe {
+            asm!("mv {}, ra", out(reg) v); 
+        }
+        println!("主调函数 PTE: {:?}", crate::memory::mapping::Mapping::crate_pte(VirtualPageNumber::ceil(VirtualAddress(v)))); 
         self.process.inner().memory_set.activate();
+        println!("线程 {:?} 页表已激活。", self); 
         // 取出 Context
         let parked_frame = self.inner().context.take().unwrap();
+        println!("线程上下文信息已取出。"); 
+        println!("ra: 0x{:x}", parked_frame.ra()); 
+        println!("sp: 0x{:x}", parked_frame.sp()); 
         // 将 Context 放至内核栈顶
-        unsafe { KERNEL_STACK.push_context(parked_frame) }
+        let result = unsafe { KERNEL_STACK.push_context(parked_frame) }; 
+        println!("内核栈上已就绪线程上下文。"); 
+        println!("指针值为 {:p}", result); 
+        println!("处于内存的：{:?}", crate::memory::mapping::Mapping::crate_pte(VirtualPageNumber::ceil(result.into()))); 
+        let _v = Test; 
+        result 
     }
 
     /// 发生时钟中断后暂停线程，保存状态
@@ -81,7 +104,6 @@ impl Thread {
                 dead: false,
             }),
         });
-
         Ok(thread)
     }
 

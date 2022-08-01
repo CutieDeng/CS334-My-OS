@@ -34,46 +34,39 @@ mod sheep_logger;
 #[inline(always)] 
 #[allow(dead_code)]
 unsafe fn ebreak() {
-    use core::arch::asm; 
     asm!("ebreak"); 
 }
 
 #[no_mangle]
 pub extern "C" fn rust_main() -> ! {
     interrupt::init(); 
-    if false 
-    {
-        let mut a: usize; 
-        unsafe {
-            core::arch::asm!("csrr {}, satp", out(reg) a); 
-        }
-        println!("satp: 0x{:x}", a); 
-        unsafe {
-            core::arch::asm!("mv {}, sp", out(reg) a); 
-        }
-        println!("sp: 0x{:x}", a); 
-        extern "C" {
-            fn kernel_end(); 
-        }
-        println!("END of kernel: 0x{:x}", kernel_end as usize); 
-    }
     memory::init();
     process::init(); 
+
     let remap = memory::mapping::MemorySet::new_kernel().unwrap(); 
     remap.activate(); 
 
-    // println!("test"); 
     sheep_logger::init().expect("日志管理器加载失败！");
     sheep_logger::set_level(LevelFilter::Trace);
 
     log::info!("kernel remap! "); 
 
+    {
+        let t: usize; 
+        unsafe {
+            asm!("csrr {}, sscratch", out(reg) t); 
+        }
+        log::trace!("Before ebreak, the value of kernel stack top is 0x{:x}", t); 
+    }
     unsafe { ebreak(); } 
-    // loop {} 
+    {
+        let t: usize; 
+        unsafe {
+            asm!("csrr {}, sscratch", out(reg) t); 
+        }
+        log::trace!("After ebreak, the value of kernel stack top is 0x{:x}", t); 
+    }
     
-    let mut k = 0; 
-    for _ in 0..1000000000 { k += 1; k = 0; } 
-
     if true {
         // 内核重映射测试
         // 测时 rodata 无法被 write. 
@@ -133,14 +126,46 @@ pub extern "C" fn rust_main() -> ! {
 
     log::info!("你好，我的 rCore. "); 
 
-    extern "C" {
-        fn __restore (context: usize); 
+    {
+        // use sheep_nucleus::process::PROCESSOR; 
+        let mut processor = PROCESSOR.lock(); 
+        log::info!("获得 cpu 抽象");
+        let kernel_process = Process::new_kernel(); 
+        let kernel_process = kernel_process.unwrap(); 
+        log::info!("构建进程成功"); 
+        // for i in 1..9usize {
+        processor.add_thread(create_kernel_thread(kernel_process.clone(), sample_process as usize, Some(&[0]))); 
+        log::info!("创建线程中"); 
+        // }
     }
 
-    use sheep_nucleus::process::PROCESSOR; 
-    let context = PROCESSOR.lock().prepare_next_thread(); 
-    unsafe {
-        __restore(context as usize); 
+    {
+        let t: usize; 
+        unsafe {
+            asm!("mv {}, sp", out(reg) t); 
+        }
+        log::trace!("Before ebreak, the value of user stack top is 0x{:x}", t); 
+    }
+    unsafe { ebreak(); } 
+    {
+        let t: usize; 
+        unsafe {
+            asm!("mv {}, sp", out(reg) t); 
+        }
+        log::trace!("After ebreak, the value of user stack top is 0x{:x}", t); 
+    }
+
+    shutdown(); 
+
+    {
+        extern "C" {
+            fn __restore (context: usize); 
+        }
+        let context = PROCESSOR.lock().prepare_next_thread(); 
+        println!("即将 j __restore. "); 
+        unsafe {
+            __restore(context as usize); 
+        }
     }
 
     unreachable!(); 
@@ -167,4 +192,8 @@ pub fn create_kernel_thread (
     // 设置进程的返回地址为 kernel thread exit. 
     thread.as_ref().inner().context.as_mut().unwrap().set_ra(kernel_thread_exit as usize); 
     thread
+}
+
+fn sample_process (message: usize) {
+    println!("Hello from kernel thread: {}", message ); 
 }

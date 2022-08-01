@@ -14,8 +14,6 @@
 
 #![allow(dead_code)]
 
-use core::arch; 
-
 /// sbi 调用
 /// 
 /// # 传入参数

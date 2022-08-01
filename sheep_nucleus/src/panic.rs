@@ -61,7 +61,7 @@ fn panic_handler(info: &core::panic::PanicInfo) -> ! {
     // console::open_blue_print();
     let mut cached = [0u8; 1024]; 
     let mut cached = U8Array::new(&mut cached); 
-    let mut tmp: [u8; 128] = unsafe { MaybeUninit::uninit().assume_init() }; 
+    let mut tmp: [u8; 512] = unsafe { MaybeUninit::uninit().assume_init() }; 
     let mut tmp = U8Array::new(&mut tmp); 
     // let _ = cached.write_str("\x1b[2J\x1b[1K"); 
     let mid_print = |w: &mut U8Array, s: &str| -> bool { 
@@ -72,7 +72,8 @@ fn panic_handler(info: &core::panic::PanicInfo) -> ! {
             return true; 
         }
         if len > OUTPUT_WIDTH {
-            return false 
+            let _ = write!(w, "{}\r\n", s); 
+            return false; 
         }
         let sp = (OUTPUT_WIDTH - len) / 2; 
         let _ = write!(w, "\x1b[{}C{}\r\n", sp, s); 
