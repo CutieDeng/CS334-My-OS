@@ -71,8 +71,8 @@ __restore:
     csrw sepc, s2
 
     # 将内核栈地址写入 sscratch
-    # addi    t0, sp, CONTEXT_SIZE * REG_SIZE
-    # csrw    sscratch, t0 
+    addi    t0, sp, CONTEXT_SIZE * REG_SIZE
+    csrw    sscratch, t0 
 
     # 恢复通用寄存器
     LOAD x1, 1
@@ -85,6 +85,6 @@ __restore:
 
     LOAD x2, 2
 
-    csrrw sp, sscratch, sp 
+    # csrrw sp, sscratch, sp 
     
     sret 

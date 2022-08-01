@@ -53,9 +53,9 @@ impl Thread {
         unsafe {
             asm!("mv {}, ra", out(reg) v); 
         }
-        println!("主调函数 PTE: {:?}", crate::memory::mapping::Mapping::crate_pte(VirtualPageNumber::ceil(VirtualAddress(v)))); 
         self.process.inner().memory_set.activate();
         println!("线程 {:?} 页表已激活。", self); 
+        println!("主调函数 PTE: {:?}", crate::memory::mapping::Mapping::crate_pte(VirtualPageNumber::ceil(VirtualAddress(v)))); 
         // 取出 Context
         let parked_frame = self.inner().context.take().unwrap();
         println!("线程上下文信息已取出。"); 

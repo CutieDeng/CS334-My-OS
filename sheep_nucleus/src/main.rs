@@ -155,7 +155,7 @@ pub extern "C" fn rust_main() -> ! {
         log::trace!("After ebreak, the value of user stack top is 0x{:x}", t); 
     }
 
-    shutdown(); 
+    // shutdown(); 
 
     {
         extern "C" {
